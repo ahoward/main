@@ -1,0 +1,43 @@
+8
+
+dir
+644
+svn+ssh://ahoward@rubyforge.org/var/svn/codeforpeople/main/trunk/lib
+svn+ssh://ahoward@rubyforge.org/var/svn/codeforpeople
+
+
+
+2008-05-30T17:51:44.166670Z
+636
+jjh
+
+
+svn:special svn:externals svn:needs-lock
+
+
+
+
+
+
+
+
+
+
+
+29922619-e960-4932-8d85-0e0be7f1775a
+
+main
+dir
+
+main.rb
+file
+707
+
+
+
+2008-07-19T19:41:38.000000Z
+d22f4ee788073bb27bffd38f44deef08
+2008-10-22T19:35:40.423901Z
+707
+ahoward
+

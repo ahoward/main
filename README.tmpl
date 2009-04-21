@@ -1,0 +1,784 @@
+NAME
+  main.rb
+
+SYNOPSIS
+  a class factory and dsl for generating command line programs real quick
+
+URI
+  http://codeforpeople.com/lib/ruby/
+  http://rubyforge.org/projects/codeforpeople/
+  http://codeforpeople.rubyforge.org/svn/
+
+INSTALL
+  gem install main
+
+DESCRIPTION
+  main.rb features the following:
+
+    - unification of option, argument, keyword, and environment parameter
+      parsing
+    - auto generation of usage and help messages
+    - support for mode/sub-commands
+    - io redirection support
+    - logging hooks using ruby's built-in logging mechanism
+    - intelligent error handling and exit codes 
+    - use as dsl or library for building Main objects
+    - parsing user defined ARGV and ENV
+    - zero requirements for understanding the obtuse apis of *any* command
+      line option parsers
+    - leather pants
+
+  in short main.rb aims to drastically lower the barrier to writing uniform
+  command line applications.
+
+  for instance, this program
+
+    require 'main'
+
+    Main {
+      argument 'foo'
+      option 'bar'
+
+      def run
+        p params['foo']
+        p params['bar']
+        exit_success!
+      end
+    }
+
+  sets up a program which requires one argument, 'bar', and which may accept one
+  command line switch, '--foo' in addition to the single option/mode which is always
+  accepted and handled appropriately: 'help', '--help', '-h'.  for the most
+  part main.rb stays out of your command line namespace but insists that your
+  application has at least a help mode/option.
+
+  main.rb supports sub-commands in a very simple way
+
+    require 'main'
+
+    Main {
+      mode 'install' do
+        def run() puts 'installing...' end
+      end
+
+      mode 'uninstall' do
+        def run() puts 'uninstalling...' end
+      end
+    }
+
+  which allows a program, called 'a.rb', to be invoked as
+
+    ruby a.rb install
+
+  and
+
+    ruby a.rb uninstall
+
+  for simple programs main.rb is a real time saver but it's for more complex
+  applications where main.rb's unification of parameter parsing, class
+  configuration dsl, and auto-generation of usage messages can really streamline
+  command line application development.  for example the following 'a.rb'
+  program:
+
+    require 'main'
+
+    Main {
+      argument('foo'){
+        cast :int
+      }
+      keyword('bar'){
+        arity 2
+        cast :float
+        defaults 0.0, 1.0
+      }
+      option('foobar'){
+        argument :optional
+        description 'the foobar option is very handy'
+      }
+      environment('BARFOO'){
+        cast :list_of_bool
+        synopsis 'export barfoo=value'
+      }
+
+      def run
+        p params['foo'].value
+        p params['bar'].values
+        p params['foobar'].value
+        p params['BARFOO'].value
+      end
+    }
+
+  when run with a command line of
+
+    BARFOO=true,false,false ruby a.rb 42 bar=40 bar=2 --foobar=a
+
+  will produce
+
+    42
+    [40.0, 2.0]
+    "a"
+    [true, false, false]
+
+  while a command line of
+
+    ruby a.rb --help
+
+  will produce
+
+    NAME
+      a.rb
+
+    SYNOPSIS
+      a.rb foo [bar=bar] [options]+
+
+    PARAMETERS
+      * foo [ 1 -> int(foo) ]
+
+      * bar=bar [ 2 ~> float(bar=0.0,1.0) ]
+
+      * --foobar=[foobar] [ 1 ~> foobar ]
+          the foobar option is very handy
+
+      * --help, -h
+
+      * export barfoo=value
+
+  and this shows how all of argument, keyword, option, and environment parsing
+  can be declartively dealt with in a unified fashion - the dsl for all
+  parameter types is the same - and how auto synopsis and usage generation saves
+  keystrokes.  the parameter synopsis is compact and can be read as
+
+      * foo [ 1 -> int(foo) ]
+
+        'one argument will get processed via int(argument_name)'
+
+          1        : one argument
+          ->       : will get processed (the argument is required)
+          int(foo) : the cast is int, the arg name is foo
+
+      * bar=bar [ 2 ~> float(bar=0.0,1.0) ]
+
+        'two keyword arguments might be processed via float(bar=0.0,1.0)'
+
+          2                  : two arguments
+          ~>                 : might be processed (the argument is optional)
+          float(bar=0.0,1.0) : the cast will be float, the default values are
+                               0.0 and 1.0
+
+      * --foobar=[foobar] [ 1 ~> foobar ]
+
+        'one option with optional argument may be given directly'
+
+      * --help, -h
+
+        no synopsis, simple switch takes no args and is not required
+
+      * export barfoo=value
+
+        a user defined synopsis
+
+SAMPLES
+  @samples
+
+DOCS
+  test/main.rb
+
+  vim -p lib/main.rb lib/main/*rb
+
+  API section below
+
+HISTORY
+  2.8.3
+    - support for block defaults
+
+
+  2.8.2
+    - fixes and tests for negative arity/attr arguments, options, eg
+
+        argument(:foo){
+          arity -1  
+        }
+
+        def run  # ARGV == %w( a b c )
+          p foo  #=> %w( a b c )
+        end
+
+      thanks nathan
+
+  2.8.1
+    - move from attributes.rb to fattr.rb
+
+  2.8.0 
+    - added 'to_options' method for Parameter::Table.  this allows you to convert
+      all the parameters to a simple hash.  
+      for example
+
+        Main {
+          option 'foo'
+          argument 'baz'
+
+          run { puts params.to_options.inspect } 
+
+        }
+
+  2.7.0
+    - removed bundled arrayfields and attributes.  these are now dependancies
+      mananged by rubygems.  a.k.a. you must have rubygems installed for main
+      to work.
+
+  2.6.0
+    - added 'mixin' feaature for storing, and later evaluating a block of
+      code.  the purpose of this is for use with modes where you want to keep
+      your code dry, but may not want to define something in the base class
+      for all to inherit.  'mixin' allows you to define the code to inherit
+      once and the selectively drop it in child classes (modes) on demand.
+      for example
+
+        Main {
+          mixin :foobar do
+            option 'foo'
+            option 'bar'
+          end
+
+          mode :install do
+            mixin :foobar
+          end
+
+          mode :uninstall do
+            mixin :foobar
+          end
+
+          mode :clean do
+          end
+        }
+
+    - mode definitions are now deferred to the end of the Main block, so you
+      can do this
+
+        Main {
+          mode 'a' do
+            mixin :foo
+          end
+
+          mode 'b' do
+            mixin :foo
+          end
+
+          def inherited_method
+            42
+          end
+
+          mixin 'foo' do
+            def another_inherited_method
+              'forty-two'
+            end
+          end
+        }
+
+    - added sanity check at end of paramter contruction
+
+    - improved auto usage generation when arity is used with arguments
+
+    - removed 'p' shortcut in paramerter dsl because it collided with
+      Kernel.p.  it's now called 'param'.  this method is availble *inside* a
+      parameter definition
+
+        option('foo', 'f'){
+          synopsis "arity = #{ param.arity }"
+        }
+      
+    - fixed bug where '--' did not signal the end of parameter parsing in a
+      getoptlong compliant way
+
+    - added (before/after)_parse_parameters, (before/after)_initialize, and
+      (before/after)_run hooks
+
+    - fixed bug where adding to usage via
+
+        usage['my_section'] = 'custom message'
+
+      totally horked the default auto generated usage message
+
+    - updated dependancies in gemspec.rb for attributes (~> 5.0.0) and
+      arrayfields (~> 4.3.0)
+
+    - check that client code defined run, iff not wrap_run! is called.  this is
+      so mains with a mode, but no run defined, still function correctly when 
+      passed a mode
+
+    - added new shortcut for creating accessors for parameters.  for example
+
+        option('foo'){
+          argument :required
+          cast :int
+          attr
+        }
+
+        def run
+          p foo ### this attr will return the parameter's *value*
+        end
+
+      a block can be passed to specify how to extract the value from the
+      parameter
+
+        argument('foo'){
+          optional
+          default 21 
+          cast :int
+          attr{|param| param.value * 2}
+        }
+
+        def run
+          p foo #=> 42 
+        end
+
+    - fixed bug where 'abort("message")' would print "message" twice on exit
+      if running under a nested mode (yes again - the fix in 2.4.0 wasn't
+      complete)
+
+    - added a time cast, which uses Time.parse
+
+        argument('login_time'){ cast :time }
+
+    - added a date cast, which uses Date.parse
+
+        argument('login_date'){ cast :date }
+    
+
+  2.5.0
+    - added 'examples', 'samples', and 'api' kewords to main dsl.  each
+      keyword takes a list of strings which will be included in the help
+      message
+        
+        Main {
+          examples "foobar example", "barfoo example"
+
+          samples <<-txt
+            do this
+
+            don't do that
+          txt
+
+          api %(
+            foobar string, hash
+
+            barfoo hash, string
+          ) 
+        }
+
+      results in a usage message with sections like
+
+      ...
+
+      EXAMPLES
+        foobar example
+        barfoo example
+
+      SAMPLES
+        do this
+
+        don't do that
+
+      API
+        foobar string, hash
+
+        barfoo hash, string
+
+      ...
+
+  2.4.0
+    - fixed bug where 'abort("message")' would print "message" twice on exit
+      if running under a nested mode.
+
+    - allowed parameters to be overridden completely in subclasses (modes)
+
+  2.3.0
+    - re-worked Main.new such that client code may define an #initialize
+      methods and the class will continue to work.  that is to say it's fine
+      to do this
+
+        Main {
+          def initialize
+            @a = 42
+          end
+
+          def run
+            p @a
+          end
+
+          mode 'foo' do
+            def run
+              p @a
+            end
+          end
+        }
+
+      the client #initialize will be called *after* main has done it's normal
+      initialization so things like @argv, @env, and @stdin will all be there
+      in initialize.  of course you could have done this before but you'd have
+      to both call super and call it with the correct arguments - now you can
+      simply ignore it.
+
+  2.2.0
+    - added ability for parameter dsl error handlers to accept an argument,
+      this will be passed the current error.  for example
+
+        argument(:x) do
+          arity 42
+        
+          error do |e|
+            case e
+              when Parameter::Arity
+            ...
+          end
+        end  
+
+    - refined the mode parsing a bit: modes can now be abbreviated to uniqness
+      and, when the mode is ambiuous, a nice error message is printed, for
+      example:
+
+        ambiguous mode: in = (inflate or install)?
+
+  2.1.0
+    - added custom error handling dsl for parameters, this includes the ability
+      to prepend, append, or replace the standard error handlers:
+
+        require 'main'
+
+        Main {
+          argument 'x' do
+            error :before do
+              puts 'this fires *before* normal error handling using #instance_eval...'
+            end
+
+            error do
+              puts 'this fires *instead of* normal error handling using #instance_eval...'
+            end
+
+            error :after do
+              puts 'this fires *after* normal error handling using #instance_eval...'
+            end
+          end
+          
+          run(){ p param['x'].given? }
+        }
+
+    - added ability to exit at any time bypassing *all* error handling using
+      'throw :exit, 42' where 42 is the desired exit status.  throw without a
+      status simply exits with 0.
+
+    - added 'help!' method which simply dumps out usage and exits
+
+  2.0.0
+    - removed need for proxy.rb via Main::Base.wrap_run!
+    - added error handling hooks for parameter parsing
+    - bundled arrayfields, attributes, and pervasives although gems are tried
+      first
+    - softened error messages for parameter parsing errors: certain classes of
+      errors are now 'softspoken' and print only the message, not the entire
+      stacktrace, to stderr.  much nicer for users.  this is configurable.
+    - added subcommand/mode support
+    - added support for user defined exception handling on top level
+      exceptions/exits
+    - added support for negative arity.  this users ruby's own arity
+      semantics, for example:
+      
+        lambda{|*a|}.arity     == -1
+        lambda{|a,*b|}.arity   == -2
+        lambda{|a,b,*c|}.arity == -3
+        ...
+
+      in otherwords parameters now support 'zero or more', 'one or more' ...
+      'n or more' argument semantics
+
+  1.0.0
+    - some improved usage messages from jeremy hinegardner
+
+  0.0.2
+    - removed dependancy on attributes/arrayfields.  main now has zero gem
+      dependancies.
+
+    - added support for io redirection.  redirection of stdin, stdout, and
+      stderr can be done to any io like object or object that can be
+      inerpreted as a pathname (object.to_s)
+
+    - main objects can now easily be created and run on demand, which makes
+      testing a breeze
+
+        def test_unit_goodness!
+          main = 
+            Main.new{
+              stdout StringIO.new 
+              stderr '/dev/null'
+
+              def run
+                puts 42
+              end
+            }
+
+          main.run
+          main.stdout.rewind
+
+          assert main.stdout.read == "42\n"
+        end
+
+    - added API section to readme and called it 'docs'
+
+    - wrote a bunch more tests.  there are now 42 of them.
+
+  0.0.1
+
+    initial version.  this version extracts much of the functionality of alib's
+    (gen install alib) Alib.script main program generator and also some of jim's
+    freeze's excellent CommandLine::Aplication into what i hope is a simpler and
+    more unified interface 
+
+API
+
+  Main {
+
+  ###########################################################################
+  #                       CLASS LEVEL API                                   #
+  ###########################################################################
+  #
+  # the name of the program, auto-set and used in usage 
+  #
+    program 'foo.rb'
+  #
+  # a short description of program functionality, auto-set and used in usage
+  #
+    synopsis "foo.rb arg [options]+"
+  #
+  # long description of program functionality, used in usage iff set
+  #
+    description <<-hdoc
+      this text will automatically be indented to the right level.
+
+      it should describe how the program works in detail
+    hdoc
+  #
+  # used in usage iff set
+  #
+    author 'ara.t.howard@gmail.com'
+  #
+  # used in usage
+  #
+    version '0.0.42'
+  #
+  # stdin/out/err can be anthing which responds to read/write or a string
+  # which will be opened as in the appropriate mode 
+  #
+    stdin '/dev/null'
+    stdout '/dev/null'
+    stderr open('/dev/null', 'w')
+  #
+  # the logger should be a Logger object, something 'write'-able, or a string
+  # which will be used to open the logger.  the logger_level specifies the
+  # initalize verbosity setting, the default is Logger::INFO
+  #
+    logger(( program + '.log' ))
+    logger_level Logger::DEBUG
+  #
+  # you can configure exit codes.  the defaults are shown
+  #
+    exit_success # 0
+    exit_failure # 1
+    exit_warn    # 42
+  #
+  # the usage object is rather complex.  by default it's an object which can
+  # be built up in sections using the 
+  #
+  #   usage["BUGS"] = "something about bugs'
+  #
+  # syntax to append sections onto the already pre-built usage message which
+  # contains program, synopsis, parameter descriptions and the like
+  #
+  # however, you always replace the usage object wholesale with one of your
+  # chosing like so
+  #
+    usage <<-txt
+      my own usage message
+    txt
+
+  ###########################################################################
+  #                         MODE API                                        #
+  ###########################################################################
+  #
+  # modes are class factories that inherit from their parent class.  they can
+  # be nested *arbitrarily* deep.  usage messages are tailored for each mode.
+  # modes are, for the most part, independant classes but parameters are
+  # always a superset of the parent class - a mode accepts all of it's parents
+  # paramters *plus* and additional ones
+  # 
+    option 'inherited-option'
+    argument 'inherited-argument'
+
+    mode 'install' do
+      option 'force' do
+        description 'clobber existing installation'
+      end
+
+      def run
+        inherited_method()
+        puts 'installing...'
+      end
+
+      mode 'docs' do
+        description 'installs the docs'
+
+        def run
+          puts 'installing docs...'
+        end
+      end
+    end
+
+    mode 'un-install' do
+      option 'force' do
+        description 'remove even if dependancies exist'
+      end
+
+      def run
+        inherited_method()
+        puts 'un-installing...'
+      end
+    end
+
+    def run
+      puts 'no mode yo?'
+    end
+
+    def inherited_method
+      puts 'superclass_method...'
+    end
+
+
+  ###########################################################################
+  #                         PARAMETER API                                   #
+  ###########################################################################
+  #
+  # all the parameter types of argument|keyword|option|environment share this
+  # api.  you must specify the type when the parameter method is used.
+  # alternatively used one of the shortcut methods
+  # argument|keyword|option|environment.  in otherwords
+  #
+  #   parameter('foo'){ type :option } 
+  #
+  # is synonymous with
+  #
+  #   option('foo'){ } 
+  #
+    option 'foo' {
+    #
+    # required - whether this paramter must by supplied on the command line.
+    # note that you can create 'required' options with this keyword
+    #
+      required # or required true
+    #
+    # argument_required - applies only to options.
+    #
+      argument_required # argument :required
+    #
+    # argument_optional - applies only to options.
+    #
+      argument_optional # argument :optional
+    #
+    # cast - should be either a lambda taking one argument, or a symbol
+    # designation one of the built in casts defined in Main::Cast.  supported
+    # types are :boolean|:integer|:float|:numeric|:string|:uri.  built-in
+    # casts can be abbreviated
+    #
+      cast :int
+    #
+    # validate - should be a lambda taking one argument and returning
+    # true|false
+    #
+      validate{|int| int == 42}
+    #
+    # synopsis - should be a concise characterization of the paramter.  a
+    # default synopsis is built automatically from the parameter.  this
+    # information is displayed in the usage message
+    #
+      synopsis '--foo'
+    #
+    # description - a longer description of the paramter.  it appears in the
+    # usage also.
+    #
+      description 'a long description of foo'
+    #
+    # arity - indicates how many times the parameter should appear on the
+    # command line.  the default is one.  negative arities are supported and
+    # follow the same rules as ruby methods/procs.
+    #
+      arity 2
+    #
+    # default - you can provide a default value in case none is given.  the
+    # alias 'defaults' reads a bit nicer when you are giving a list of
+    # defaults for paramters of > 1 arity
+    #
+      defaults 40, 2
+    #
+    # you can add custom per-parameter error handlers using the following
+    #
+      error :before do
+        puts 'this fires *before* normal error handling using #instance_eval...'
+      end
+
+      error do
+        puts 'this fires *instead of* normal error handling using #instance_eval...'
+      end
+
+      error :after do
+        puts 'this fires *after* normal error handling using #instance_eval...'
+      end
+    }
+
+  ###########################################################################
+  #                       INSTANCE LEVEL API                                #
+  ###########################################################################
+  #
+  # you must define a run method.  it is the only method you must define.
+  #
+    def run
+      #
+      # all parameters are available in the 'params' hash and via the alias
+      # 'param'.  it can be indexed via string or symbol.  the values are all
+      # Main::Parameter objects
+      #
+        foo = params['foo']
+      #
+      # the given? method indicates whether or not the parameter was given on
+      # the commandline/environment, etc.  in particular this will not be true
+      # when a default value was specified but no parameter was given 
+      #
+        foo.given?
+      #
+      # the list of all values can be retrieved via 'values'.  note that this
+      # is always an array.
+      #
+        p foo.values
+      #
+      # the __first__ value can be retrieved via 'value'.  note that this
+      # never an array.
+      #
+        p foo.value
+      #
+      # the methods debug|info|warn|error|fatal are delegated to the logger
+      # object
+      #
+        info{ "this goes to the log" }
+      #
+      # you can set the exit_status at anytime.  this status is used when
+      # exiting the program.  exceptions cause this to be ext_failure if, and
+      # only if, the current value was exit_success.  in otherwords an
+      # un-caught exception always results in a failing exit_status
+      #
+        exit_status exit_failure
+      #
+      # a few shortcuts both set the exit_status and exit the program.
+      #
+        exit_success!
+        exit_failure!
+        exit_warn!
+    end
+
+  }

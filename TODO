@@ -1,0 +1,20 @@
+
+* support pathname casts
+* support uri casts
+* support filename casts
+* support directory costs
+* support io cast '-' (:input, :output)
+
+* fix weird super bug jeremy found
+
+* figure out how to support '-' ??
+
+* clean up warnings under 'ruby -d'
+* error reporting weird for some errors
+
+===============================================================================
+X calls to abort sometimes lead to STDERR prining twice ;-(
+X main's' with modes, but no run do not operate properly - add default run w/wrap_run!
+X usage fubar when extra chunks are set
+X usage of arguments is fubar when negative arities are used
+X add sanity checks at parameter contruction completion
