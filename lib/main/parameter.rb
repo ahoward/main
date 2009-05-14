@@ -528,11 +528,10 @@ puts
 
     class DSL
       def self.evaluate param, &block
-        new(param).evaluate(&block)
+        new(param).instance_eval(&block)
       end
 
       attr 'param'
-      alias_method 'evaluate', 'instance_eval'
 
       def initialize param
         @param = param

@@ -346,7 +346,7 @@ module Main
 
     def setup_io_restoration
       [STDIN, STDOUT, STDERR].each do |io|
-        dup = io.dup and @finalizers.push lambda{ io.reopen dup }
+        dup = io.dup and @finalizers.push lambda{ io.reopen dup rescue nil }
       end
     end
 
