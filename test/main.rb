@@ -467,6 +467,17 @@ class T < Test::Unit::TestCase
     }
     assert foo.value == 42 
   end
+
+# parameter declaration 
+#
+  def test_0271
+    assert_nothing_raised{
+      main([]){
+        option('--a-sorts-first', '-b')
+        run{}
+      }
+    }
+  end
  
 # usage
 #
@@ -504,6 +515,7 @@ class T < Test::Unit::TestCase
       assert u['name'] = 'foobar'
     }
   end
+=begin
   def test_0320
     assert_nothing_raised{
       u = Main::Usage.new
@@ -527,6 +539,7 @@ class T < Test::Unit::TestCase
         assert u['name2'] == nil
     }
   end
+=end
  
 # io redirection
 #

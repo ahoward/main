@@ -88,7 +88,7 @@ module Main
 
         name
       end
-      @names = @names.sort.reverse
+      @names = @names.sort_by{|name| name.size}.reverse
       @names[1..-1].each do |name|
         raise ArgumentError, "only one long name allowed (#{ @names.inspect })" if
           name.size > 1
