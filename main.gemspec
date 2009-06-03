@@ -1,7 +1,7 @@
 
   Gem::Specification::new do |spec|
     spec.name = "main"
-    spec.version = "2.8.4"
+    spec.version = "2.8.5"
     spec.platform = Gem::Platform::RUBY
     spec.summary = "main"
 
