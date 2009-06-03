@@ -515,7 +515,6 @@ class T < Test::Unit::TestCase
       assert u['name'] = 'foobar'
     }
   end
-=begin
   def test_0320
     assert_nothing_raised{
       u = Main::Usage.new
@@ -539,7 +538,6 @@ class T < Test::Unit::TestCase
         assert u['name2'] == nil
     }
   end
-=end
  
 # io redirection
 #

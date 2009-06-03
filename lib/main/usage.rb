@@ -20,9 +20,6 @@ module Main
       fields.clear
     end
 
-    def delete_at key
-      self[key] = nil
-    end
     alias_method 'delete', 'delete_at'
 
     def self.default_synopsis main
