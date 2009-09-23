@@ -206,20 +206,6 @@ SAMPLES
     true
     42
 
-  ~ > ruby samples/a.rb --help
-
-    NAME
-      a.rb
-    
-    SYNOPSIS
-      a.rb foo [options]+
-    
-    PARAMETERS
-      foo (1 -> int(foo)) 
-          the foo param 
-      --help, -h 
-    
-
 
   <========< samples/b.rb >========>
 
@@ -247,20 +233,6 @@ SAMPLES
 
     true
     [40, 1, 1]
-
-  ~ > ruby samples/b.rb --help
-
-    NAME
-      b.rb
-    
-    SYNOPSIS
-      b.rb foo foo foo [options]+
-    
-    PARAMETERS
-      foo (3 -> int(foo)) 
-          the foo param 
-      --help, -h 
-    
 
 
   <========< samples/c.rb >========>
@@ -295,20 +267,6 @@ SAMPLES
     [40.0, 2.0]
     true
     false
-
-  ~ > ruby samples/c.rb --help
-
-    NAME
-      c.rb
-    
-    SYNOPSIS
-      c.rb foo=foo [bar=bar] [options]+
-    
-    PARAMETERS
-      foo=foo (2 -> float(foo)) 
-      bar=bar (1 ~> bool(bar)) 
-      --help, -h 
-    
 
 
   <========< samples/d.rb >========>
@@ -349,19 +307,70 @@ SAMPLES
     nil
     false
 
-  ~ > ruby samples/d.rb --help
 
-    NAME
-      d.rb
+  <========< samples/e.rb >========>
+
+  ~ > cat samples/e.rb
+
+    require 'main'
     
-    SYNOPSIS
-      d.rb --foo=foo [options]+
+    Main {
+      argument 'global-argument'
+      option 'global-option'
     
-    PARAMETERS
-      --foo=foo, -f (2 -> float(foo)) 
-      --bar=[bar], -b (0 ~> bool(bar=false)) 
-      --help, -h 
+      def run() puts 'global-run' end
     
+      mode 'a' do
+        option 'a-option'
+      end
+    
+      mode 'b' do
+        option 'b-option'
+    
+        def run() puts 'b-run' end
+      end
+    }
+
+  ~ > ruby samples/e.rb
+
+    argument(global-argument)) 0/1
+
+
+  <========< samples/f.rb >========>
+
+  ~ > cat samples/f.rb
+
+    require 'main'
+    
+    Main {
+      argument('directory'){ description 'the directory to operate on' }
+    
+      option('force'){ description 'use a bigger hammer' }
+    
+      def run
+        puts 'this is how we run when no mode is specified'
+      end
+    
+      mode 'compress' do
+        option('bzip'){ description 'use bzip compression' }
+    
+        def run
+          puts 'this is how we run in compress mode' 
+        end
+      end
+    
+      mode 'uncompress' do
+        option('delete-after'){ description 'delete orginal file after uncompressing' }
+    
+        def run
+          puts 'this is how we run in un-compress mode' 
+        end
+      end
+    }
+
+  ~ > ruby samples/f.rb
+
+    argument(directory)) 0/1
 
 
   <========< samples/g.rb >========>
@@ -382,20 +391,6 @@ SAMPLES
   ~ > ruby samples/g.rb
 
     This is what to_options produces: {"help"=>nil, "foo"=>"42", "bar"=>nil}
-
-  ~ > ruby samples/g.rb --help
-
-    NAME
-      g.rb
-    
-    SYNOPSIS
-      g.rb foo [options]+
-    
-    PARAMETERS
-      foo (1 -> foo) 
-      --bar 
-      --help, -h 
-    
 
 
   <========< samples/h.rb >========>
@@ -443,18 +438,6 @@ SAMPLES
 
     "forty-two"
 
-  ~ > ruby samples/h.rb --help
-
-    NAME
-      h.rb
-    
-    SYNOPSIS
-      h.rb (a|b) [options]+
-    
-    PARAMETERS
-      --foobar 
-      --help, -h 
-    
 
 
 DOCS
