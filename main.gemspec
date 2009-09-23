@@ -7,7 +7,7 @@ Gem::Specification::new do |spec|
   spec.platform = Gem::Platform::RUBY
   spec.summary = "main"
 
-  spec.files = ["install.rb", "lib", "lib/main", "lib/main/base.rb", "lib/main/cast.rb", "lib/main/factories.rb", "lib/main/getoptlong.rb", "lib/main/logger.rb", "lib/main/mode.rb", "lib/main/parameter.rb", "lib/main/softspoken.rb", "lib/main/stdext.rb", "lib/main/usage.rb", "lib/main/util.rb", "lib/main.rb", "main.gemspec", "Rakefile", "README", "README.erb", "README.tmpl", "samples", "samples/a.rb", "samples/b.rb", "samples/c.rb", "samples/d.rb", "samples/e.rb", "samples/f.rb", "samples/g.rb", "samples/h.rb", "test", "test/main.rb", "TODO"]
+  spec.files = ["lib", "lib/main", "lib/main/base.rb", "lib/main/cast.rb", "lib/main/factories.rb", "lib/main/getoptlong.rb", "lib/main/logger.rb", "lib/main/mode.rb", "lib/main/parameter.rb", "lib/main/softspoken.rb", "lib/main/stdext.rb", "lib/main/usage.rb", "lib/main/util.rb", "lib/main.rb", "main.gemspec", "Rakefile", "README", "README.erb", "samples", "samples/a.rb", "samples/b.rb", "samples/c.rb", "samples/d.rb", "samples/e.rb", "samples/f.rb", "samples/g.rb", "samples/h.rb", "test", "test/main.rb", "TODO"]
   spec.executables = []
   
   
