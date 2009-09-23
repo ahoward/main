@@ -87,11 +87,11 @@ module Main
       fattr( 'stderr' ){ $stderr } 
       fattr( 'logger' ){ stderr } 
       fattr( 'logger_level' ){ Logger::INFO } 
-      fattr( 'exit_status' ){ EXIT_SUCCESS } 
-      fattr( 'exit_success' ){ EXIT_SUCCESS } 
-      fattr( 'exit_failure' ){ EXIT_FAILURE } 
-      fattr( 'exit_warn' ){ EXIT_WARN } 
-      inheritable_fattr( 'parameters' ){ Parameter::List[] }
+      fattr( 'exit_status' ){ Main::EXIT_SUCCESS } 
+      fattr( 'exit_success' ){ Main::EXIT_SUCCESS } 
+      fattr( 'exit_failure' ){ Main::EXIT_FAILURE } 
+      fattr( 'exit_warn' ){ Main::EXIT_WARN } 
+      inheritable_fattr( 'parameters' ){ Main::Parameter::List[] }
       inheritable_fattr( 'can_has_hash' ){ Hash.new }
       inheritable_fattr( 'mixin_table' ){ Hash.new }
 
