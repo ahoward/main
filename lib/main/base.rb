@@ -401,11 +401,13 @@ module Main
     def before_parse_parameters() :hook end
     def parse_parameters
       pre_parse_parameters
+      before_parse_parameters
 
       self.class.parameters.parse self
       @params = Parameter::Table.new
       self.class.parameters.each{|p| @params[p.name.to_s] = p}
 
+      after_parse_parameters
       post_parse_parameters
     end
     def after_parse_parameters() :hook end
