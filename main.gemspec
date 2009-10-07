@@ -16,8 +16,8 @@ Gem::Specification::new do |spec|
 
   spec.has_rdoc = true
   spec.test_files = "test/main.rb"
-  #spec.add_dependency 'lib', '>= version'
-  #spec.add_dependency 'fattr'
+  spec.add_dependency 'fattr'
+  spec.add_dependency 'arrayfields'
 
   spec.extensions.push(*[])
 
