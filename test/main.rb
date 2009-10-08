@@ -32,22 +32,23 @@ class T < Test::Unit::TestCase
 
     this = self
 
-    klass = ::Main.create do
-      module_eval(&b) if b
+    factory =
+      Main.factory do
+        module_eval(&b) if b
 
-      define_method :handle_exception do |e|
-        if e.respond_to? :status
-          this.status = e.status
-        else
-          raise
+        define_method :handle_exception do |e|
+          if e.respond_to? :status
+            this.status = e.status
+          else
+            raise
+          end
+        end
+
+        define_method :handle_exit do |*a|
         end
       end
 
-      define_method :handle_exit do |*a|
-      end
-    end
-
-    main = klass.new argv, env
+    main = factory.new(argv, env)
 
     main.logger = @logger
 
@@ -480,7 +481,7 @@ class T < Test::Unit::TestCase
   end
   def test_0290
     assert_nothing_raised{
-      u = Main::Usage.default Main.create
+      u = Main::Usage.default(Main.factory)
     }
   end
   def test_0300

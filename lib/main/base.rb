@@ -3,27 +3,27 @@ module Main
     class << Base
     # class fattrs
     #
-      fattr( 'name' ){ File.basename $0 } 
-      fattr( 'synopsis' ){ Main::Usage.default_synopsis(self) }
-      fattr( 'description' )
-      fattr( 'usage' ){ Main::Usage.default_usage self } 
-      fattr( 'modes' ){ Main::Mode.list }
+      fattr('name'){ File.basename($0) }
+      fattr('program'){ File.basename($0) }
+      fattr('synopsis'){ Main::Usage.default_synopsis(self) }
+      fattr('description')
+      fattr('usage'){ Main::Usage.default_usage(self) }
+      fattr('modes'){ Main::Mode.list }
 
-      fattr( 'program' ){ File.basename $0 } 
-      fattr( 'author' )
-      fattr( 'version' )
-      fattr( 'stdin' ){ $stdin } 
-      fattr( 'stdout' ){ $stdout } 
-      fattr( 'stderr' ){ $stderr } 
-      fattr( 'logger' ){ Logger.new(stderr) } 
-      fattr( 'logger_level' ){ Logger::INFO } 
-      fattr( 'exit_status' ){ Main::EXIT_SUCCESS } 
-      fattr( 'exit_success' ){ Main::EXIT_SUCCESS } 
-      fattr( 'exit_failure' ){ Main::EXIT_FAILURE } 
-      fattr( 'exit_warn' ){ Main::EXIT_WARN } 
-      fattr( 'parameters' ){ Main::Parameter::List[] }
-      fattr( 'can_has_hash' ){ Hash.new }
-      fattr( 'mixin_table' ){ Hash.new }
+      fattr('author')
+      fattr('version')
+      fattr('stdin'){ $stdin }
+      fattr('stdout'){ $stdout }
+      fattr('stderr'){ $stderr }
+      fattr('logger'){ Logger.new(stderr) }
+      fattr('logger_level'){ Logger::INFO }
+      fattr('exit_status'){ Main::EXIT_SUCCESS }
+      fattr('exit_success'){ Main::EXIT_SUCCESS }
+      fattr('exit_failure'){ Main::EXIT_FAILURE }
+      fattr('exit_warn'){ Main::EXIT_WARN }
+      fattr('parameters'){ Main::Parameter::List[] }
+      fattr('can_has_hash'){ Hash.new }
+      fattr('mixin_table'){ Hash.new }
 
       undef_method 'usage'
       def usage(*args, &block)
@@ -34,53 +34,49 @@ module Main
         @usage[key.to_s] = value.to_s
       end
 
-      def create(*args, &block)
-        Factory.new(*args, &block).new()
+      def factory(&block)
+        Factory.new(&block)
       end
 
+      alias_method 'create', 'factory'
+
       class Factory
-        def initialize(*args, &block)
-          @args, @block = args, block
+        def initialize(&block)
+          @block = block
         end
 
         def new(*args, &block)
+          argv = (args.shift || ARGV).map{|arg| arg.dup}
+          env = (args.shift || ENV).to_hash.dup
+          opts = (args.shift || {}).to_hash.dup
+
+          factory = self
           subclass = Class.new(Base, &@block)
-          subclass.default_options!
-          subclass.Fattr(:factory => self)
-          subclass
-        end
-      end
 
-      def new(*args, &block)
-        argv = (args.shift || ARGV).map{|arg| arg.dup}
-        env = (args.shift || ENV).to_hash.dup
-        opts = (args.shift || {}).to_hash.dup
+          subclass.module_eval do
+            Fattr :factory => factory
+            Fattr :argv => argv
+            Fattr :env => env
+            Fattr :opts => opts
 
-        subclass = factory.new
+            dynamically_extend_via_commandline_modes!
+            default_options!
 
-        subclass.module_eval do
-          Fattr :argv => argv
-          Fattr :env => env
-          Fattr :opts => opts
+            instance =
+              allocate.instance_eval do
+                pre_initialize
+                before_initialize
+                main_initialize(argv, env, opts)
+                initialize
+                after_initialize
+                post_initialize
+                self
+              end
 
-          dynamically_extend_via_commandline_modes!
-
-          instance =
-            allocate.instance_eval do
-              pre_initialize
-              before_initialize
-              main_initialize(argv, env, opts)
-              initialize
-              after_initialize
-              post_initialize
-              self
-            end
-
-          run(&block) if block
-
-          wrap_run!
-
-          instance
+            run(&block) if block
+            wrap_run!
+            instance
+          end
         end
       end
 
@@ -127,7 +123,6 @@ module Main
             status =
               catch :exit do
                 begin
-
                   parse_parameters
 
                   if params['help'] and params['help'].given?
@@ -310,7 +305,7 @@ module Main
       pre_parse_parameters
       before_parse_parameters
 
-      self.class.parameters.parse self
+      self.class.parameters.parse(self)
       @params = Parameter::Table.new
       self.class.parameters.each{|p| @params[p.name.to_s] = p}
 
@@ -323,7 +318,7 @@ module Main
     def pre_run() :hook end
     def before_run() :hook end
     def run
-      raise NotImplementedError, 'run not defined'
+      # raise NotImplementedError, 'run not defined'
     end
     def after_run() :hook end
     def post_run() :hook end
