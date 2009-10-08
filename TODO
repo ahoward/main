@@ -9,7 +9,7 @@
 
 * figure out how to support '-' ??
 
-* clean up warnings under 'ruby -d'
+* clean up warnings under 'ruby -w'
 * error reporting weird for some errors
 
 ===============================================================================

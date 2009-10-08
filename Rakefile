@@ -64,6 +64,7 @@ task :gemspec do
 
           Gem::Specification::new do |spec|
             spec.name = #{ lib.inspect }
+            spec.description = 'a class factory and dsl for generating command line programs real quick'
             spec.version = #{ version.inspect }
             spec.platform = Gem::Platform::RUBY
             spec.summary = #{ lib.inspect }
@@ -77,8 +78,8 @@ task :gemspec do
 
             spec.has_rdoc = #{ has_rdoc.inspect }
             spec.test_files = #{ test_files.inspect }
-            spec.add_dependency 'fattr'
-            spec.add_dependency 'arrayfields'
+            spec.add_dependency 'fattr', '>= 1.0.3'
+            spec.add_dependency 'arrayfields', '>= 4.5.0'
 
             spec.extensions.push(*#{ extensions.inspect })
 

@@ -33,7 +33,7 @@ class T < Test::Unit::TestCase
     this = self
 
     klass = ::Main.create do
-      module_eval &b if b
+      module_eval(&b) if b
 
       define_method :handle_exception do |e|
         if e.respond_to? :status
@@ -43,7 +43,7 @@ class T < Test::Unit::TestCase
         end
       end
 
-      define_method :handle_throw do |*a|
+      define_method :handle_exit do |*a|
       end
     end
 
@@ -116,14 +116,6 @@ class T < Test::Unit::TestCase
       }
     }
     assert status == 42 
-  end
-  def test_0060
-    assert_nothing_raised{
-      main{
-        def run() raise ArgumentError end
-      }
-    }
-    assert status == 1
   end
   def test_0060
     assert_raises(RuntimeError){
@@ -662,7 +654,7 @@ class T < Test::Unit::TestCase
     argv = %w( a b c )
     assert_nothing_raised{
       main(argv.dup) {
-        argument('zero_or_more'){ arity -1 }
+        argument('zero_or_more'){ arity(-1) }
         run{ m = self }
       }
     }
@@ -673,7 +665,7 @@ class T < Test::Unit::TestCase
     argv = %w( a b c )
     assert_nothing_raised{
       main(argv.dup) {
-        argument('zero_or_more'){ arity -1 }
+        argument('zero_or_more'){ arity(-1) }
         run{ m = self }
       }
     }
@@ -684,7 +676,7 @@ class T < Test::Unit::TestCase
     argv = %w( a b c )
     assert_nothing_raised{
       main(argv.dup) {
-        argument('zero_or_more'){ arity '*' }
+        argument('zero_or_more'){ arity('*') }
         run{ m = self }
       }
     }
@@ -695,7 +687,7 @@ class T < Test::Unit::TestCase
     argv = %w( a b c )
     assert_nothing_raised{
       main(argv.dup) {
-        argument('one_or_more'){ arity -2 }
+        argument('one_or_more'){ arity(-2) }
         run{ m = self }
       }
     }
@@ -706,7 +698,7 @@ class T < Test::Unit::TestCase
     argv = %w( a b c )
     assert_nothing_raised{
       main(argv.dup) {
-        argument('two_or_more'){ arity -3 }
+        argument('two_or_more'){ arity(-3) }
         run{ m = self }
       }
     }
@@ -717,7 +709,7 @@ class T < Test::Unit::TestCase
     argv = %w()
     assert_nothing_raised{
       main(argv.dup) {
-        argument('zero_or_more'){ arity -1 }
+        argument('zero_or_more'){ arity(-1) }
         run{ m = self }
       }
     }
@@ -728,7 +720,7 @@ class T < Test::Unit::TestCase
     argv = %w()
     assert_raises(Main::Parameter::NotGiven){
       main(argv.dup) {
-        argument('one_or_more'){ arity -2 }
+        argument('one_or_more'){ arity(-2) }
         run{ m = self }
       }
     }
@@ -738,7 +730,7 @@ class T < Test::Unit::TestCase
     argv = %w( a )
     assert_raises(Main::Parameter::Arity){
       main(argv.dup) {
-        argument('two_or_more'){ arity -3 }
+        argument('two_or_more'){ arity(-3) }
         run{ m = self }
       }
     }
@@ -748,7 +740,7 @@ class T < Test::Unit::TestCase
     argv = %w( a )
     assert_raises(Main::Parameter::Arity){
       main(argv.dup) {
-        argument('two_or_more'){ arity -4 }
+        argument('two_or_more'){ arity(-4) }
         run{ m = self }
       }
     }
@@ -767,6 +759,7 @@ class T < Test::Unit::TestCase
         end
       }
     }
+    assert m, 'm.nil!'
     assert m.param['b'].value == 'b'
   end 
   def test_0490
@@ -782,7 +775,37 @@ class T < Test::Unit::TestCase
         end
       }
     }
+    assert m, 'm.nil!'
     assert m.param['c'].value == 'c'
+  end 
+  def test_0491
+    m = nil
+    argv = %w(a b c)
+    count = Hash.new{|h,k| h[k] = 0}
+    assert_nothing_raised{
+      main(argv.dup) {
+        %w(
+          initialize
+          pre_initialize
+          before_initialize
+          post_initialize
+          after_initialize
+        ).each do |method|
+          define_method(method){ count[method] += 1 }
+        end
+        mode 'a' do
+          mode 'b' do
+            mode 'c' do
+              run{ m = self }
+            end
+          end
+        end
+      }
+    }
+    assert m, 'm.nil!'
+    count.each do |key, val|
+      assert val==1, key
+    end
   end 
 
  
@@ -832,7 +855,7 @@ class T < Test::Unit::TestCase
     argvs.each do |argv|
       assert_nothing_raised{
         main(argv.dup) {
-          argument(name){ arity -1; attr }
+          argument(name){ arity(-1); attr }
           run{ m = send(name) }
         }
       }

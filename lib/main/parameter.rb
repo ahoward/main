@@ -38,22 +38,24 @@ module Main
         @sym ||= name.split(%r/::/).last.downcase.to_sym
       end
 
-      def class_for type 
+      def class_for(type)
         sym = type.to_s.downcase.to_sym
         c = Types.detect{|t| t.sym == sym}
         raise ArgumentError, type.inspect unless c
         c
       end
 
-      def create type, *a, &b 
-        c = class_for type
+      def create(type, main, *a, &b)
+        c = class_for(type)
         obj = c.allocate
         obj.type = c.sym
-        obj.instance_eval{ initialize *a, &b }
+        obj.main = main
+        obj.instance_eval{ initialize(*a, &b) }
         obj
       end
     end
 
+    fattr 'main'
     fattr 'type'
     fattr 'names'
     fattr 'abbreviations'
@@ -74,8 +76,9 @@ module Main
     fattr 'error_handler_instead'
     fattr 'error_handler_after'
 
-    def initialize name, *names, &block
-      @names = Cast.list_of_string name, *names
+    def initialize(name, *names, &block)
+      @names = Cast.list_of_string(name, *names)
+
       @names.map! do |name|
         if name =~ %r/^-+/
           name.gsub! %r/^-+/, ''
@@ -330,7 +333,7 @@ puts
         defaults!
         validate!
 
-        argv.push *ignore[1 .. -1] unless ignore.empty? 
+        argv.push(*ignore[1..-1]) unless ignore.empty? 
 
         return self
       ensure
@@ -520,8 +523,8 @@ puts
         replace keep
       end
 
-      def << *a 
-        delete *a
+      def <<(*a)
+        delete(*a)
         super
       end
     end
@@ -541,7 +544,7 @@ puts
         name = param.name
         a ||= name
         b = fattr_block_for name, &block 
-        Main.current.module_eval{ fattr *a, &b }
+        @param.main.module_eval{ fattr(*a, &b) }
       end
       alias_method 'attribute', 'fattr'
 
@@ -550,8 +553,8 @@ puts
         lambda{ block.call self.param[name] }
       end
 
-      def attr *a, &b
-        fattr *a, &b
+      def attr(*a, &b)
+        fattr(*a, &b)
       end
 
       def example *list
@@ -643,7 +646,7 @@ puts
           raise ArgumentError, 'no default'
         end
         unless values.empty?
-          param.defaults.push *values
+          param.defaults.push(*values)
         end
         unless block.nil?
           param.defaults.push block

@@ -12,11 +12,13 @@ module Main
       ensure
         self.fields = []
       end
+
       def add klass
         mode_name = Mode.new klass.mode_name
         raise Duplicate, mode_name if has_key? mode_name
         self[mode_name] = klass
       end
+
       def find_by_mode m, options = {}
         quiet = options['quiet'] || options[:quiet]
         each_pair do |mode, klass|
@@ -37,8 +39,8 @@ module Main
       end
     end
 
-    def self.list *a, &b
-      List.new *a, &b
+    def self.list(*a, &b)
+      List.new(*a, &b)
     end
   end
 end

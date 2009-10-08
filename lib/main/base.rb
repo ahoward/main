@@ -1,13 +1,128 @@
 module Main
   class Base
-    class << self
-      def wrap_run!
-        const_set :RUN, instance_method(:run)
+    class << Base
+    # class fattrs
+    #
+      fattr( 'name' ){ File.basename $0 } 
+      fattr( 'synopsis' ){ Main::Usage.default_synopsis(self) }
+      fattr( 'description' )
+      fattr( 'usage' ){ Main::Usage.default_usage self } 
+      fattr( 'modes' ){ Main::Mode.list }
 
-        class_eval do
+      fattr( 'program' ){ File.basename $0 } 
+      fattr( 'author' )
+      fattr( 'version' )
+      fattr( 'stdin' ){ $stdin } 
+      fattr( 'stdout' ){ $stdout } 
+      fattr( 'stderr' ){ $stderr } 
+      fattr( 'logger' ){ Logger.new(stderr) } 
+      fattr( 'logger_level' ){ Logger::INFO } 
+      fattr( 'exit_status' ){ Main::EXIT_SUCCESS } 
+      fattr( 'exit_success' ){ Main::EXIT_SUCCESS } 
+      fattr( 'exit_failure' ){ Main::EXIT_FAILURE } 
+      fattr( 'exit_warn' ){ Main::EXIT_WARN } 
+      fattr( 'parameters' ){ Main::Parameter::List[] }
+      fattr( 'can_has_hash' ){ Hash.new }
+      fattr( 'mixin_table' ){ Hash.new }
+
+      undef_method 'usage'
+      def usage(*args, &block)
+        usage! unless defined? @usage 
+        return @usage if args.empty? and block.nil?
+        key, value, *ignored = args
+        value = block.call if block
+        @usage[key.to_s] = value.to_s
+      end
+
+      def create(*args, &block)
+        Factory.new(*args, &block).new()
+      end
+
+      class Factory
+        def initialize(*args, &block)
+          @args, @block = args, block
+        end
+
+        def new(*args, &block)
+          subclass = Class.new(Base, &@block)
+          subclass.default_options!
+          subclass.Fattr(:factory => self)
+          subclass
+        end
+      end
+
+      def new(*args, &block)
+        argv = (args.shift || ARGV).map{|arg| arg.dup}
+        env = (args.shift || ENV).to_hash.dup
+        opts = (args.shift || {}).to_hash.dup
+
+        subclass = factory.new
+
+        subclass.module_eval do
+          Fattr :argv => argv
+          Fattr :env => env
+          Fattr :opts => opts
+
+          dynamically_extend_via_commandline_modes!
+
+          instance =
+            allocate.instance_eval do
+              pre_initialize
+              before_initialize
+              main_initialize(argv, env, opts)
+              initialize
+              after_initialize
+              post_initialize
+              self
+            end
+
+          run(&block) if block
+
+          wrap_run!
+
+          instance
+        end
+      end
+
+# TODO - ambiguous modes
+
+    # extend the class based on modules given in argv
+    #
+      def dynamically_extend_via_commandline_modes!
+        size = modes.size
+        depth_first_modes = Array.fields
+
+        loop do
+          modes.each do |mode|
+            arg = argv.first && %r/^#{ argv.first }/
+            if arg and mode.name =~ arg
+              argv.shift
+              modes.clear
+              module_eval(&mode)
+              depth_first_modes[mode.name] = mode
+              break
+            end
+          end
+
+          arg = argv.first && %r/^#{ argv.first }/
+          more_modes = (
+            !modes.empty? and modes.any?{|mode| arg && mode.name =~ arg}
+          )
+
+          break unless more_modes
+        end
+
+        self.modes = depth_first_modes
+      end
+
+    # wrap up users run method to handle errors, etc
+    #
+      def wrap_run!
+        const_set(:RUN, instance_method(:run))
+
+        module_eval do
           def run *a, &b
             argv.push "--#{ argv.shift }" if argv.first == 'help'
-            return mode_run! if mode_given?
 
             status =
               catch :exit do
@@ -33,243 +148,33 @@ module Main
                 nil
               end
 
-            handle_throw status
+            handle_exit(status)
           end
         end
       end
 
-      def method_added m
-        return if @in_method_added
-        super if defined? super
-        @in_method_added = true
-        begin
-          wrap_run! if m.to_s == 'run'
-        ensure
-          @in_method_added = false 
-        end
-      end
-
-      def self.inheritable_fattr name, &block
-        block ||= lambda{}
-        fattr( name ){ 
-          catch :value do
-            if parent?
-              value = parent.send name 
-              value =
-                begin
-                  Util.mcp value
-                rescue
-                  value.clone rescue value.dup
-                end
-              throw :value, value 
-            end
-            instance_eval &block
-          end
-        } 
-      end
-
-    # fattrs
-      fattr( 'name' ){ File.basename $0 } 
-      fattr( 'synopsis' ){ Main::Usage.default_synopsis(self) }
-      fattr( 'description' )
-      fattr( 'usage' ){ Main::Usage.default_usage self } 
-      fattr( 'modes' ){ Main::Mode.list }
-      fattr( 'mode_definitions' ){ Array.new }
-      fattr( 'mode_name' ){ 'main' }
-      fattr( 'parent' ){ nil }
-      fattr( 'children' ){ Set.new }
-
-      fattr( 'program' ){ File.basename $0 } 
-      fattr( 'author' )
-      fattr( 'version' )
-      fattr( 'stdin' ){ $stdin } 
-      fattr( 'stdout' ){ $stdout } 
-      fattr( 'stderr' ){ $stderr } 
-      fattr( 'logger' ){ stderr } 
-      fattr( 'logger_level' ){ Logger::INFO } 
-      fattr( 'exit_status' ){ Main::EXIT_SUCCESS } 
-      fattr( 'exit_success' ){ Main::EXIT_SUCCESS } 
-      fattr( 'exit_failure' ){ Main::EXIT_FAILURE } 
-      fattr( 'exit_warn' ){ Main::EXIT_WARN } 
-      inheritable_fattr( 'parameters' ){ Main::Parameter::List[] }
-      inheritable_fattr( 'can_has_hash' ){ Hash.new }
-      inheritable_fattr( 'mixin_table' ){ Hash.new }
-
-    # override a few fattrs
-      def mode_name=(value)
-        @mode_name = Mode.new value
-      end
-
-      def usage *argv, &block
-        usage! unless defined? @usage 
-        return @usage if argv.empty? and block.nil?
-        key, value, *ignored = argv
-        value = block.call if block
-        @usage[key.to_s] = value.to_s
-      end
-
-      def create parent = Base, *a, &b
-        Class.new parent do |child|
-          child.parent = parent unless parent == Base
-          parent.children.add child
-          child.context do
-            child.class_eval &b if b
-            child.default_options!
-            #child.wrap_run! unless child.const_defined?(:RUN)
-            mode_definitions.each do |name, block|
-              klass = 
-                create context do
-                  mode_name name.to_s
-                  module_eval &block if block
-                end
-              modes.add klass
-            end
-          end
-        end
-      end
-
-      def context &block 
-        @@context ||= []
-        unless block 
-          @@context.last
-        else
-          begin
-            @@context.push self 
-            block.call @@context.last
-          ensure
-            @@context.pop
-          end
-        end
-      end
-
-      module ::Main
-        singleton_class{
-          def current
-            ::Main::Base.context
-          end
-        }
-      end
-
+# TODO
       def fully_qualified_mode
-        list = []
-        ancestors.each do |ancestor|
-          break unless ancestor < Base
-          list << ancestor.mode_name
-        end
-        list.reverse[1..-1]
+        modes.map{|mode| mode.name}.join(' ')
+      end
+
+      def mode_name
+        return 'main' if modes.empty?
+        fully_qualified_mode
       end
 
       def run(&b) define_method(:run, &b) end
-
-      def new(*a, &b)
-        allocate.instance_eval do
-          pre_initialize
-          before_initialize
-          main_initialize *a, &b
-          initialize
-          after_initialize
-          post_initialize
-          self
-        end
-      end
     end
 
-    module DSL
-      def parameter *a, &b
-        (parameters << Parameter.create(:parameter, *a, &b)).last
-      end
+    extend Main::DSL
 
-      def option *a, &b
-        (parameters << Parameter.create(:option, *a, &b)).last
-      end
-      alias_method 'opt', 'option'
-      alias_method 'switch', 'option'
-
-      def default_options!
-        option 'help', 'h' unless parameters.has_option?('help', 'h')
-      end
-
-      def argument *a, &b
-        (parameters << Parameter.create(:argument, *a, &b)).last
-      end
-      alias_method 'arg', 'argument'
-
-      def keyword *a, &b
-        (parameters << Parameter.create(:keyword, *a, &b)).last
-      end
-      alias_method 'kw', 'keyword'
-
-      def environment *a, &b
-        (parameters << Parameter.create(:environment, *a, &b)).last
-      end
-      alias_method 'env', 'environment'
-
-=begin
-      def mode name, &b
-        klass = 
-          create context do
-            mode_name name.to_s
-            module_eval &b if b
-          end
-        modes.add klass
-      end
-=end
-
-      def mode name, &b
-        mode_definitions << [name, b]
-      end
-
-      def can_has ptype, *a, &b
-        key = a.map{|s| s.to_s}.sort_by{|s| -s.size }.first
-        can_has_hash.update key => [ptype, a, b]
-        key
-      end
-
-      def has key, *keys 
-        keys = [key, *keys].flatten.compact.map{|k| k.to_s}
-        keys.map do |key|
-          ptype, a, b = can_has_hash[key]
-          abort "yo - can *not* has #{ key.inspect }!?" unless(ptype and a and b)
-          send ptype, *a, &b
-          key
-        end
-      end
-
-      def mixin name, *names, &block
-        names = [name, *names].flatten.compact.map{|name| name.to_s}
-        if block
-          names.each do |name|
-            mixin_table[name] = block
-          end
-        else
-          names.each do |name|
-            module_eval &mixin_table[name]
-          end
-        end
-      end
-
-## TODO - for some reason these hork the usage!
-
-      %w[ examples samples api ].each do |chunkname|
-        module_eval <<-code
-          def #{ chunkname } *a, &b 
-            txt = b ? b.call : a.join("\\n")
-            usage['#{ chunkname }'] = txt
-          end
-        code
-      end
-      alias_method 'example', 'examples'
-      alias_method 'sample', 'samples'
-    end
-    extend DSL
-
-    fattr 'argv'
-    fattr 'env'
+    fattr('argv'){ ARGV }
+    fattr('env'){ ENV }
     fattr 'params'
-    fattr 'logger'
-    fattr 'stdin'
-    fattr 'stdout'
-    fattr 'stderr'
+    fattr('stdin'){ Main::Base.stdin }
+    fattr('stdout'){ Main::Base.stdout }
+    fattr('stderr'){ Main::Base.stderr }
+    fattr('logger'){ Main::Base.logger }
 
     %w( 
       program name synopsis description author version
@@ -292,8 +197,6 @@ module Main
       code
     end
 
-=begin
-=end
     def pre_initialize() :hook end
     def before_initialize() :hook end
     def main_initialize argv = ARGV, env = ENV, opts = {}
@@ -328,6 +231,7 @@ module Main
       log = self.class.logger || stderr
       self.logger = log
     end
+    undef_method 'logger='
     def logger= log
       unless(defined?(@logger) and @logger == log)
         case log 
@@ -337,7 +241,7 @@ module Main
             @logger = Logger.new log 
             @logger.level = logger_level 
           else
-            @logger = Logger.new *log
+            @logger = Logger.new(*log)
             @logger.level = logger_level 
         end
       end
@@ -350,6 +254,7 @@ module Main
       end
     end
 
+    undef_method 'stdin='
     def stdin= io
       unless(defined?(@stdin) and (@stdin == io))
         @stdin =
@@ -369,6 +274,7 @@ module Main
       end
     end
 
+    undef_method 'stdout='
     def stdout= io
       unless(defined?(@stdout) and (@stdout == io))
         @stdout =
@@ -383,6 +289,7 @@ module Main
       end
     end
 
+    undef_method 'stderr='
     def stderr= io
       unless(defined?(@stderr) and (@stderr == io))
         @stderr =
@@ -421,37 +328,21 @@ module Main
     def after_run() :hook end
     def post_run() :hook end
 
-    def mode_given?
-      begin
-        modes.size > 0 and
-        argv.size > 0 and
-        modes.find_by_mode(argv.first)
-      rescue Mode::Ambiguous
-        true
-      end
-    end
-    def mode_run!
-      mode = modes.find_by_mode argv.shift
-      klass = modes[mode] or abort "bad mode <#{ mode }>"
-      main = klass.new @argv, @env, @opts
-      main.mode = mode
-      main.run
-    end
+    fattr 'mode'
     def modes
       self.class.modes
     end
-    fattr 'mode'
 
-    def help! status = 0
+    def help!(status = 0)
       print usage.to_s
       exit(status)
     end
 
-    def abort message = 'exit'
+    def abort(message = 'exit')
       raise SystemExit.new(message)
     end
 
-    def handle_exception e
+    def handle_exception(e)
       if e.respond_to?(:error_handler_before)
         fcall(e, :error_handler_before, self)
       end
@@ -481,8 +372,12 @@ module Main
       exit exit_status
     end
 
-    def fcall obj, m, *argv, &block
-      m = obj.method m
+    def handle_exit(status)
+      exit(( Integer(status) rescue 0 ))
+    end
+
+    def fcall(object, method, *argv, &block)
+      method = object.method(method)
       arity = m.arity
       if arity >= 0
         argv = argv[0, arity]
@@ -490,11 +385,7 @@ module Main
         arity = arity.abs - 1
         argv = argv[0, arity] + argv[arity .. -1]
       end
-      m.call *argv, &block
-    end
-
-    def handle_throw status
-      exit(( Integer(status) rescue 0 ))
+      method.call(*argv, &block)
     end
 
     %w[ before instead after ].each do |which|
@@ -505,13 +396,13 @@ module Main
       code
     end
 
-    def instance_eval_block *argv, &block
-      sc =
+    def instance_eval_block(*argv, &block)
+      singleton_class =
         class << self
           self
         end
-      sc.module_eval{ define_method '__instance_eval_block', &block }
-      fcall self, '__instance_eval_block', *argv, &block
+      singleton_class.module_eval{ define_method('__instance_eval_block', &block) }
+      fcall(self, '__instance_eval_block', *argv, &block)
     end
   end
 end

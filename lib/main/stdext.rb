@@ -1,26 +1,17 @@
 class Object
-  def singleton_class object = self, &block
-    sc =
+  def singleton_class(object = self, &block)
+    singleton_class =
       class << object
         self
       end
-    block ? sc.module_eval(&block) : sc
-  end
-
-end
-
-module SaneAbort
-  def abort message = nil
-    if message
-      message = message.to_s
-      message.singleton_class{ fattr 'abort' => true }
-      STDERR.puts message
-    end
-    exit 1
+    block ? singleton_class.module_eval(&block) : singleton_class
   end
 end
 
-  def abort message = nil
+module Kernel
+private
+  undef_method 'abort'
+  def abort(message = nil)
     if message
       message = message.to_s
       message.singleton_class{ fattr 'abort' => true }
@@ -28,11 +19,18 @@ end
     end
     exit 1
   end
-  def Process.abort message = nil
-    if message
-      message = message.to_s
-      message.singleton_class{ fattr 'abort' => true }
-      STDERR.puts message
+end
+
+module Process
+  class << Process
+    undef_method 'abort'
+    def abort(message = nil)
+      if message
+        message = message.to_s
+        message.singleton_class{ fattr 'abort' => true }
+        STDERR.puts message
+      end
+      exit 1
     end
-    exit 1
   end
+end
