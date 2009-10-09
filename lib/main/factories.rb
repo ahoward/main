@@ -1,14 +1,14 @@
 module Main
   def Main.factory(&block)
-    Base.factory(&block)
+    Program.factory(&block)
   end
 
   def Main.create(&block)
-    Base.factory(&block)
+    factory(&block)
   end
 
   def Main.new(*args, &block)
-    create(&block).new(*args)
+    factory(&block).build(*args).new()
   end
 
   def Main.run(*args, &block)

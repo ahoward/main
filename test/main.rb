@@ -1,11 +1,11 @@
-$:.unshift '.'
-$:.unshift './lib'
-$:.unshift '..'
-$:.unshift '../lib'
+$:.unshift('.')
+$:.unshift('./lib')
+$:.unshift('..')
+$:.unshift('../lib')
 
-require 'stringio'
-require 'test/unit'
-require 'main'
+require('stringio')
+require('test/unit')
+require('main')
 
 
 class T < Test::Unit::TestCase
@@ -22,7 +22,7 @@ class T < Test::Unit::TestCase
   def teardown
   end
 
-  def main argv=[], env={}, &b
+  def main(argv=[], env={}, &block)
     at_exit{ exit! }
 
     $VERBOSE=nil
@@ -30,33 +30,33 @@ class T < Test::Unit::TestCase
     ENV.clear
     env.each{|k,v| ENV[k.to_s]=v.to_s}
 
-    this = self
+    test = self
 
-    factory =
-      Main.factory do
-        module_eval(&b) if b
+    factory = Main.factory(&block)
 
-        define_method :handle_exception do |e|
-          if e.respond_to? :status
-            this.status = e.status
-          else
-            raise
-          end
-        end
+    program = factory.build(argv, env)
 
-        define_method :handle_exit do |*a|
+    main = program.new
+
+    program.evaluate do
+      define_method :handle_exception do |exception|
+        if exception.respond_to?(:status)
+          test.status = main.status = exception.status
+        else
+          test.status = main.status
+          raise(exception)
         end
       end
-
-    main = factory.new(argv, env)
-
-    main.logger = @logger
-
-    begin
-      main.run
-    ensure
-      this.status ||= main.exit_status
+      define_method :handle_exit do |status|
+        test.status = main.status = status
+      end
     end
+
+    main.logger = logger
+
+    main.run
+
+    test.status ||= main.exit_status
 
     main
   end
@@ -78,7 +78,7 @@ class T < Test::Unit::TestCase
         define_method(:run){ x = 42 }
       }
     }
-    assert x == 42
+    assert_equal 42, x 
   end
  
 # exit status
@@ -89,7 +89,7 @@ class T < Test::Unit::TestCase
         def run() end
       }
     }
-    assert status == 0
+    assert_equal 0, status
   end
   def test_0030
     assert_nothing_raised{
@@ -97,7 +97,7 @@ class T < Test::Unit::TestCase
         def run() exit 42 end
       }
     }
-    assert status == 42
+    assert_equal 42, status
   end
   def test_0040
     assert_nothing_raised{
@@ -107,7 +107,7 @@ class T < Test::Unit::TestCase
         }
       }
       Process.wait
-      assert $?.exitstatus == 42 
+      assert_equal 42, $?.exitstatus
     }
   end
   def test_0050
@@ -116,7 +116,7 @@ class T < Test::Unit::TestCase
         def run() exit 42 end
       }
     }
-    assert status == 42 
+    assert_equal 42, status
   end
   def test_0060
     assert_raises(RuntimeError){
@@ -124,7 +124,7 @@ class T < Test::Unit::TestCase
         def run() exit_status 42; raise end
       }
     }
-    assert status == 42 
+    assert_equal 42, status
   end
   def test_0070
     assert_raises(ArgumentError){
@@ -132,7 +132,7 @@ class T < Test::Unit::TestCase
         def run() exit_status 42; raise ArgumentError end
       }
     }
-    assert status == 42 
+    assert_equal 42, status
   end
  
 # parameter parsing 
@@ -432,9 +432,9 @@ class T < Test::Unit::TestCase
     foobar = nil
     assert_nothing_raised{
       main(%w[foo=40 --bar=2 foobar foo=42]){
-        kw('foo'){ cast :int; arity 2 }
-        opt('bar='){ cast :int }
-        arg 'foobar'
+        keyword('foo'){ cast :int; arity 2 }
+        option('bar='){ cast :int }
+        argument 'foobar'
 
         define_method('run'){ 
           foo = param['foo'] 
@@ -452,7 +452,7 @@ class T < Test::Unit::TestCase
     foo = nil
     assert_nothing_raised{
       main([], 'foo' => '42'){
-        env('foo'){ cast :int }
+        environment('foo'){ cast :int }
         define_method('run'){ 
           foo = param['foo'] 
         }

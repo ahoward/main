@@ -42,7 +42,6 @@ module Main
   require libdir + 'parameter'
   require libdir + 'getoptlong'
   require libdir + 'mode'
-  require libdir + 'dsl'
-  require libdir + 'base'
+  require libdir + 'program'
   require libdir + 'factories'
 end

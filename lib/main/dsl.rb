@@ -1,5 +1,3 @@
-module Main
-  module DSL
     def parameter(*a, &b)
       (parameters << Parameter.create(:parameter, self, *a, &b)).last
     end
@@ -77,5 +75,3 @@ module Main
     end
     alias_method 'example', 'examples'
     alias_method 'sample', 'samples'
-  end
-end
