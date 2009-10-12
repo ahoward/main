@@ -1,18 +1,27 @@
 require 'main'
 
-Main {
-  argument 'global-argument'
-  option 'global-option'
+ARGV.replace %w( x y argument )
 
-  def run() puts 'global-run' end
+Main {
+  argument 'argument'
+  option 'option'
+
+  def run() puts 'run' end
 
   mode 'a' do
     option 'a-option'
+    def run() puts 'a-run' end
   end
 
-  mode 'b' do
-    option 'b-option'
+  mode 'x' do
+    option 'x-option'
 
-    def run() puts 'b-run' end
+    def run() puts 'x-run' end
+
+      mode 'y' do
+        option 'y-option'
+
+        def run() puts 'y-run' end
+      end
   end
 }

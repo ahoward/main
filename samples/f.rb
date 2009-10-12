@@ -1,5 +1,7 @@
 require 'main'
 
+ARGV.replace %W( compress /data )
+
 Main {
   argument('directory'){ description 'the directory to operate on' }
 

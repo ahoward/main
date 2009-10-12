@@ -314,26 +314,35 @@ SAMPLES
 
     require 'main'
     
-    Main {
-      argument 'global-argument'
-      option 'global-option'
+    ARGV.replace %w( x y argument )
     
-      def run() puts 'global-run' end
+    Main {
+      argument 'argument'
+      option 'option'
+    
+      def run() puts 'run' end
     
       mode 'a' do
         option 'a-option'
+        def run() puts 'a-run' end
       end
     
-      mode 'b' do
-        option 'b-option'
+      mode 'x' do
+        option 'x-option'
     
-        def run() puts 'b-run' end
+        def run() puts 'x-run' end
+    
+          mode 'y' do
+            option 'y-option'
+    
+            def run() puts 'y-run' end
+          end
       end
     }
 
   ~ > ruby samples/e.rb
 
-    argument(global-argument)) 0/1
+    y-run
 
 
   <========< samples/f.rb >========>
@@ -341,6 +350,8 @@ SAMPLES
   ~ > cat samples/f.rb
 
     require 'main'
+    
+    ARGV.replace %W( compress /data )
     
     Main {
       argument('directory'){ description 'the directory to operate on' }
@@ -370,7 +381,7 @@ SAMPLES
 
   ~ > ruby samples/f.rb
 
-    argument(directory)) 0/1
+    this is how we run in compress mode
 
 
   <========< samples/g.rb >========>
@@ -447,7 +458,8 @@ DOCS
 
 HISTORY
   3.0.0
-    - major refactor to support modes via module/extend vs. subclassing.  NOT backward compatible.
+    - major refactor to support modes via module/extend vs. subclassing.
+    MIGHT NOT be backward compatible, though no known issues thus far.
 
   2.9.0
     - support ruby 1.9
