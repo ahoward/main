@@ -30,6 +30,8 @@ class T < Test::Unit::TestCase
     ENV.clear
     env.each{|k,v| ENV[k.to_s]=v.to_s}
 
+    Main.push_ios!
+
     test = self
 
     factory = Main.factory(&block)
@@ -57,6 +59,8 @@ class T < Test::Unit::TestCase
     main.run
 
     test.status ||= main.exit_status
+
+    Main.pop_ios!
 
     main
   end
@@ -599,8 +603,8 @@ class T < Test::Unit::TestCase
         end
       }
     }
-    assert test(?e, sout.path)
-    assert IO.read(sout.path) == "42\n" 
+    assert test(?e, sout.path), 'sout exists'
+    assert IO.read(sout.path) == "42\n", 'sout has correct output'
   end
   def test_0370
     m = nil

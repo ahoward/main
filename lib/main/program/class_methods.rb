@@ -48,24 +48,25 @@ module Main
           opts = (args.shift || {}).to_hash.dup
 
           factory = self
+
           program = Class.new(Program)
-          program.evaluate(&factory)
+
+          program.factory = factory
+          program.argv = argv
+          program.env = env
+          program.opts = opts
+
+          program.module_eval(&factory)
 
           program.module_eval do
-            program.factory = factory
-            program.argv = argv
-            program.env = env
-            program.opts = opts
-
             dynamically_extend_via_commandline_modes!
             program.set_default_options!
-
             define_method(:run, &block) if block
-
             wrap_run!
           end
           program
         end
+
       end
 
       def new()

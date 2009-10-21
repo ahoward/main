@@ -8,11 +8,14 @@ module Main
   end
 
   def Main.new(*args, &block)
-    factory(&block).build(*args).new()
+    main_class = factory(&block).build(*args)
+    main_class.new()
   end
 
   def Main.run(*args, &block)
-    new(*args, &block).run()
+    main_class = factory(&block).build(*args)
+    main = main_class.new()
+    main.run()
   end
 end
 
@@ -21,6 +24,5 @@ private
   def Main(*args, &block)
     Main.run(*args, &block)
   end
-
   alias_method 'main', 'Main'
 end

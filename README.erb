@@ -186,6 +186,14 @@ DOCS
   API section below
 
 HISTORY
+  4.0.0
+    - avoid duping ios.  new methods Main.push_ios! and Main.pop_ios! are
+    utilized for testing.  this was done to make it simple to wrap
+    daemon/servolux programs around main, althought not strictly required.
+    not the version bump - there is not reason to expect existing main
+    programs to break, but it *is* and interface change which requires a major
+    version bump.
+
   3.0.0
     - major refactor to support modes via module/extend vs. subclassing.
     MIGHT NOT be backward compatible, though no known issues thus far.

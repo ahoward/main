@@ -41,7 +41,6 @@ module Main
       def before_initialize() :hook end
       def main_initialize()
         setup_finalizers
-        setup_io_restoration
         setup_io_redirection
         setup_logging
       end
@@ -50,13 +49,14 @@ module Main
       def post_initialize() :hook end
 
       def setup_finalizers
-        @finalizers = finalizers = []
+        @finalizers ||= []
         ObjectSpace.define_finalizer(self) do
           while((f = finalizers.pop)); f.call; end
         end
       end
 
       def finalize
+        @finalizers ||= []
         while((f = @finalizers.pop)); f.call; end
       end
 
@@ -76,39 +76,43 @@ module Main
           case log 
             when ::Logger, Logger
               @logger = log
-            when IO, StringIO
-              @logger = Logger.new log 
-              @logger.level = logger_level 
             else
               @logger = Logger.new(*log)
-              @logger.level = logger_level 
+              @logger.level = logger_level
           end
         end
         @logger
       end
 
       def setup_io_restoration
+      return
+        @finalizers ||= []
         [STDIN, STDOUT, STDERR].each do |io|
-          dup = io.dup and @finalizers.push lambda{ io.reopen dup rescue nil }
+          dup = io.dup
+          @finalizers.push(
+            lambda do
+              io.reopen(dup)
+            end
+          )
         end
       end
-
+      
       undef_method 'stdin='
       def stdin= io
         unless(defined?(@stdin) and (@stdin == io))
           @stdin =
-            if io.respond_to? 'read'
+            if io.respond_to?('read')
               io
             else
-              fd = open io.to_s, 'r+'
-              @finalizers.push lambda{ fd.close }
+              fd = open(io.to_s, 'r+')
+              @finalizers.push(lambda{ fd.close })
               fd
             end
           begin
-            STDIN.reopen @stdin
+            STDIN.reopen(@stdin)
           rescue
             $stdin = @stdin
-            ::Object.const_set 'STDIN', @stdin
+            ::Object.const_set('STDIN', @stdin)
           end
         end
       end
@@ -117,14 +121,19 @@ module Main
       def stdout= io
         unless(defined?(@stdout) and (@stdout == io))
           @stdout =
-            if io.respond_to? 'write'
+            if io.respond_to?('write')
               io
             else
-              fd = open io.to_s, 'w+'
-              @finalizers.push lambda{ fd.close }
+              fd = open(io.to_s, 'w+')
+              @finalizers.push(lambda{ fd.close })
               fd
             end
-          STDOUT.reopen @stdout rescue($stdout = @stdout)
+          begin
+            STDOUT.reopen(@stdout)
+          rescue
+            $stdout = @stdout
+            ::Object.const_set('STDOUT', @stdout)
+          end
         end
       end
 
@@ -132,14 +141,19 @@ module Main
       def stderr= io
         unless(defined?(@stderr) and (@stderr == io))
           @stderr =
-            if io.respond_to? 'write'
+            if io.respond_to?('write')
               io
             else
-              fd = open io.to_s, 'w+'
-              @finalizers.push lambda{ fd.close }
+              fd = open(io.to_s, 'w+')
+              @finalizers.push(lambda{ fd.close })
               fd
             end
-          STDERR.reopen @stderr rescue($stderr = @stderr)
+          begin
+            STDERR.reopen(@stderr)
+          rescue
+            $stderr = @stderr
+            ::Object.const_set('STDERR', @stderr)
+          end
         end
       end
       
