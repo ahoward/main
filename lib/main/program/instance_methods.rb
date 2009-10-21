@@ -112,7 +112,8 @@ module Main
             STDIN.reopen(@stdin)
           rescue
             $stdin = @stdin
-            ::Object.const_set('STDIN', @stdin)
+            ::Object.send(:remove_const, 'STDIN')
+            ::Object.send(:const_set, 'STDIN', @stdin)
           end
         end
       end
@@ -132,7 +133,8 @@ module Main
             STDOUT.reopen(@stdout)
           rescue
             $stdout = @stdout
-            ::Object.const_set('STDOUT', @stdout)
+            ::Object.send(:remove_const, 'STDOUT')
+            ::Object.send(:const_set, 'STDOUT', @stdout)
           end
         end
       end
@@ -152,7 +154,8 @@ module Main
             STDERR.reopen(@stderr)
           rescue
             $stderr = @stderr
-            ::Object.const_set('STDERR', @stderr)
+            ::Object.send(:remove_const, 'STDERR')
+            ::Object.send(:const_set, 'STDERR', @stderr)
           end
         end
       end

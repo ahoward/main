@@ -1,20 +1,20 @@
 module Main
-  def Main.factory(&block)
-    Program.factory(&block)
-  end
-
   def Main.create(&block)
     factory(&block)
   end
 
+  def Main.factory(&block)
+    Program.factory(&block)
+  end
+
   def Main.new(*args, &block)
-    main_class = factory(&block).build(*args)
-    main_class.new()
+    program = factory(&block).build(*args)
+    program.new()
   end
 
   def Main.run(*args, &block)
-    main_class = factory(&block).build(*args)
-    main = main_class.new()
+    program = factory(&block).build(*args)
+    main = program.new()
     main.run()
   end
 end

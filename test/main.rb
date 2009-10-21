@@ -6,6 +6,7 @@ $:.unshift('../lib')
 require('stringio')
 require('test/unit')
 require('main')
+require('main/test')
 
 
 class T < Test::Unit::TestCase
@@ -23,45 +24,19 @@ class T < Test::Unit::TestCase
   end
 
   def main(argv=[], env={}, &block)
-    at_exit{ exit! }
+    options = {}
+    options[:argv] = argv
+    options[:env] = env
+    options[:logger] = logger
 
-    $VERBOSE=nil
-    ARGV.replace argv
-    ENV.clear
-    env.each{|k,v| ENV[k.to_s]=v.to_s}
-
-    Main.push_ios!
+    main = Main.test(options, &block)
 
     test = self
-
-    factory = Main.factory(&block)
-
-    program = factory.build(argv, env)
-
-    main = program.new
-
-    program.evaluate do
-      define_method :handle_exception do |exception|
-        if exception.respond_to?(:status)
-          test.status = main.status = exception.status
-        else
-          test.status = main.status
-          raise(exception)
-        end
-      end
-      define_method :handle_exit do |status|
-        test.status = main.status = status
-      end
+    begin
+      main.run()
+    ensure
+      test.status = main.status
     end
-
-    main.logger = logger
-
-    main.run
-
-    test.status ||= main.exit_status
-
-    Main.pop_ios!
-
     main
   end
 

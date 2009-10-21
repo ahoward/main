@@ -2,7 +2,7 @@ module Main
 #
 # top level constants
 #
-  Main::VERSION = '4.0.0' unless
+  Main::VERSION = '4.1.0' unless
     defined? Main::VERSION
   def self.version() Main::VERSION end
 
@@ -44,25 +44,4 @@ module Main
   require libdir + 'mode'
   require libdir + 'program'
   require libdir + 'factories'
-
-  class << Main
-    def push_ios!
-      @ios ||= []
-      @ios.push({
-        :STDIN => STDIN.dup, :STDOUT => STDOUT.dup, :STDERR => STDERR.dup
-      })
-    end
-
-    def pop_ios!
-      @ios ||= []
-      (@ios.pop||{}).each do |const, dup|
-        dst = eval(const.to_s)
-        begin
-          dst.reopen(dup)
-        rescue
-          ::Object.const_set(const, dup)
-        end
-      end
-    end
-  end
 end
