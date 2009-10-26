@@ -134,7 +134,7 @@ module Main
                   parse_parameters
 
                   if help?
-                    puts(usage)
+                    puts(usage.to_s)
                     exit
                   end
 
