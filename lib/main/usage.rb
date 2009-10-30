@@ -31,8 +31,12 @@ module Main
         s << " #{ main.fully_qualified_mode.join ' ' }"
       end
 
+#p 'main.breadth_first_modes' => main.breadth_first_modes.map{|m| m.name}
+#p 'main.depth_first_modes' => main.depth_first_modes.map{|m| m.name}
+#p 'main.modes' => main.modes.map{|m| m.name}
+
       unless main.breadth_first_modes.empty?
-        modes = main.breadth_first_modes.keys.join('|')
+        modes = main.breadth_first_modes.map{|mode| mode.name}.join('|')
         s << " (#{ modes })"
       end
 

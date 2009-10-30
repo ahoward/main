@@ -99,18 +99,16 @@ module Main
       def dynamically_extend_via_commandline_modes!
         self.breadth_first_modes = modes.dup
         size = modes.size
-        #depth_first_modes = Array.fields
 
         loop do
           modes.each do |mode|
             arg = argv.first && %r/^#{ argv.first }/
             if arg and mode.name =~ arg
               argv.shift
-              modes.clear
+              modes.clear()
+              breadth_first_modes.clear()
               evaluate(&mode)
-#p 'self.breadth_first_modes' => self.breadth_first_modes
-#p 'self.depth_first_modes' => self.depth_first_modes
-#p 'self.modes' => self.modes
+              self.breadth_first_modes = modes.dup
               depth_first_modes[mode.name] = mode
               break
             end
@@ -124,7 +122,7 @@ module Main
           break unless more_modes
         end
 
-        self.modes = depth_first_modes
+        self.modes = depth_first_modes.dup
       end
 
     # wrap up users run method to handle errors, etc
@@ -209,8 +207,9 @@ module Main
 
       def mode(name, &block)
         name = name.to_s
-        modes[name] = block
         block.fattr(:name => name)
+        modes[name] = block
+        breadth_first_modes[name] = block
         block
       end
 
