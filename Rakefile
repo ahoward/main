@@ -78,8 +78,8 @@ task :gemspec do
 
             spec.has_rdoc = #{ has_rdoc.inspect }
             spec.test_files = #{ test_files.inspect }
-            spec.add_dependency 'fattr', '>= 1.0.3'
-            spec.add_dependency 'arrayfields', '>= 4.5.0'
+            spec.add_dependency 'fattr', '>= 2.1.0'
+            spec.add_dependency 'arrayfields', '>= 4.7.4'
 
             spec.extensions.push(*#{ extensions.inspect })
 
