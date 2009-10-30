@@ -31,8 +31,8 @@ module Main
         s << " #{ main.fully_qualified_mode.join ' ' }"
       end
 
-      unless main.modes.empty?
-        modes = main.modes.keys.join('|')
+      unless main.breadth_first_modes.empty?
+        modes = main.breadth_first_modes.keys.join('|')
         s << " (#{ modes })"
       end
 

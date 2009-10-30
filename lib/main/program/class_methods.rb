@@ -7,6 +7,8 @@ module Main
       fattr('description')
       fattr('usage'){ Main::Usage.default_usage(self) }
       fattr('modes'){ Main::Mode.list }
+      fattr('depth_first_modes'){ Main::Mode.list }
+      fattr('breadth_first_modes'){ Main::Mode.list }
 
       fattr('author')
       fattr('version')
@@ -95,8 +97,9 @@ module Main
     # extend the class based on modules given in argv
     #
       def dynamically_extend_via_commandline_modes!
+        self.breadth_first_modes = modes.dup
         size = modes.size
-        depth_first_modes = Array.fields
+        #depth_first_modes = Array.fields
 
         loop do
           modes.each do |mode|
@@ -105,6 +108,9 @@ module Main
               argv.shift
               modes.clear
               evaluate(&mode)
+#p 'self.breadth_first_modes' => self.breadth_first_modes
+#p 'self.depth_first_modes' => self.depth_first_modes
+#p 'self.modes' => self.modes
               depth_first_modes[mode.name] = mode
               break
             end
@@ -160,12 +166,12 @@ module Main
 
 # TODO
       def fully_qualified_mode
-        modes.map{|mode| mode.name}.join(' ')
+        modes.map{|mode| mode.name}
       end
 
       def mode_name
         return 'main' if modes.empty?
-        fully_qualified_mode
+        fully_qualified_mode.join(' ')
       end
 
       undef_method 'usage'
