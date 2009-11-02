@@ -322,6 +322,8 @@ puts
           (argv.size - stop).times{ argv.pop }
         end
 
+        argv.push "--#{ argv.shift }" if argv.first == 'help'
+
         parse_options argv
 
         return 'help' if detect{|p| p.name.to_s == 'help' and p.given?}

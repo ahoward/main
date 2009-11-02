@@ -859,6 +859,20 @@ class T < Test::Unit::TestCase
     end
   end 
 
+  def test_0550
+    name  = 'mode_argument_with_help_parameter_outputs_help'
+    p = nil
+    argv = %w( foo help )
+    assert_nothing_raised{
+      main(argv){
+        mode( 'foo' ) {
+          argument 'bar'
+          define_method('run'){ p = param['bar'] }
+        }
+      }
+    }
+    assert( p.nil?, "p should not be set, help should have run" )
+  end
 end
 
 
