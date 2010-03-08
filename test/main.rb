@@ -873,6 +873,18 @@ class T < Test::Unit::TestCase
     }
     assert( p.nil?, "p should not be set, help should have run" )
   end
+
+  def test_0600
+    src = 'finalizers should run'
+    dst = nil
+    argv = []
+    assert_nothing_raised{
+      main(argv){
+        define_method('run'){ finalizers.push(lambda{ dst = src }) }
+      }
+    }
+    assert( src==dst, "appears finalizer did not run!?" )
+  end
 end
 
 

@@ -12,6 +12,7 @@ module Main
       fattr('stderr'){ main.stderr }
       fattr('logger'){ main.logger }
       fattr('params')
+      fattr('finalizers')
 
       %w( 
         program name synopsis description author version
@@ -50,6 +51,7 @@ module Main
 
       def setup_finalizers
         @finalizers ||= []
+        finalizers = @finalizers
         ObjectSpace.define_finalizer(self) do
           while((f = finalizers.pop)); f.call; end
         end
