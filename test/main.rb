@@ -230,7 +230,7 @@ class T < Test::Unit::TestCase
   def test_0150
     param = nil
     assert_nothing_raised{
-      main(%w[--foo=42 --bar=42.0 --foobar=true --barfoo=false --uri=http://foo --x=s]){
+      main(%w[--foo=42 --bar=42.0 --foobar=true --barfoo=false --uri=http://foo --x=s --y=a,b,c]){
         option('foo'){ 
           required
           argument_required
@@ -256,15 +256,21 @@ class T < Test::Unit::TestCase
           argument_required
           cast{|x| x.to_s.upcase}
         }
+        option('y'){ 
+          argument_required
+          process{|*values| values.join.split(',').map{|value| value.upcase}}
+        }
         define_method('run'){ param = params }
       }
     }
     assert param['foo'].value == 42
     assert param['bar'].value == 42.0
-    assert param['foobar'].value == true 
-    assert param['barfoo'].value == 'false' 
-    assert param['uri'].value == URI.parse('http://foo') 
-    assert param['x'].value == 'S' 
+    assert param['foobar'].value == true
+    assert param['barfoo'].value == 'false'
+    assert param['uri'].value == URI.parse('http://foo')
+    assert param['x'].value == 'S'
+    assert param['y'].value == 'A'
+    assert param['y'].values == %w( A B C )
   end
   def test_0160
     p = nil 

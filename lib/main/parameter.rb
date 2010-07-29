@@ -184,14 +184,6 @@ module Main
 
       arity = min
 
-=begin
-puts
-p :values => values
-p :arity => arity
-p :argument_required => argument_required?
-p :argument_none => argument_none?
-puts
-=end
       if values.size < arity
         if argument_optional?
           raise ex, "#{ typename }) #{ values.size }/#{ sign }#{ arity }" if(values.size < arity and values.size > 0)
@@ -204,8 +196,14 @@ puts
     def apply_casting 
       if cast?
         op = cast.respond_to?('call') ? cast : Cast[cast]
-        values.map! do |val|
-          Parameter.wrap_errors{ op.call val }
+        case op.arity
+          when -1
+            replacement = Parameter.wrap_errors{ op.call(*values) }
+            values.replace(replacement)
+          else
+            values.map! do |val|
+              Parameter.wrap_errors{ op.call val }
+            end
         end
       end
     end
