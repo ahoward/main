@@ -19,11 +19,20 @@ module Main
   require 'logger'
   require 'enumerator'
   require 'set'
+  require 'uri'
+  require 'time'
+  require 'date'
 #
 # use gems to pick up dependancies
 #
   begin
     require 'rubygems'
+  rescue LoadError
+    42
+  end
+
+  begin
+    require 'chronic'
   rescue LoadError
     42
   end

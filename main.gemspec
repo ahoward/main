@@ -4,7 +4,7 @@
 Gem::Specification::new do |spec|
   spec.name = "main"
   spec.description = 'a class factory and dsl for generating command line programs real quick'
-  spec.version = "4.2.0"
+  spec.version = "4.3.0"
   spec.platform = Gem::Platform::RUBY
   spec.summary = "main"
 
