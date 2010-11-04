@@ -239,7 +239,7 @@ module Main
 
       def fcall(object, method, *argv, &block)
         method = object.method(method)
-        arity = m.arity
+        arity = method.arity
         if arity >= 0
           argv = argv[0, arity]
         else
