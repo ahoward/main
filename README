@@ -450,6 +450,48 @@ SAMPLES
     "forty-two"
 
 
+  <========< samples/j.rb >========>
+
+  ~ > cat samples/j.rb
+
+    #!/usr/bin/env ruby
+    
+    require 'open-uri'
+    
+    require 'main'
+    require 'digest/sha2'
+    
+    # you have access to a sequel/amalgalite/sqlite db for free
+    #
+    
+    Main {
+      name :i_can_haz_db
+    
+      db {
+        create_table(:mp3s) do
+          primary_key :id
+          String :url
+          String :sha
+        end unless table_exists?(:mp3s)
+      }
+    
+      def run
+        url = 'http://s3.amazonaws.com/drawohara.com.mp3/ween-voodoo_lady.mp3'
+        mp3 = open(url){|fd| fd.read}
+        sha = Digest::SHA2.hexdigest(mp3)
+    
+        db[:mp3s].insert(:url => url, :sha => sha)
+        p db[:mp3s].all
+        p db
+      end
+    }
+
+  ~ > ruby samples/j.rb
+
+    [{:url=>"http://s3.amazonaws.com/drawohara.com.mp3/ween-voodoo_lady.mp3", :sha=>"54c99ac7588dcfce1e70540b734805e9c69ff98dcca001e6f2bdec140fb0f9dc", :id=>1}, {:url=>"http://s3.amazonaws.com/drawohara.com.mp3/ween-voodoo_lady.mp3", :sha=>"54c99ac7588dcfce1e70540b734805e9c69ff98dcca001e6f2bdec140fb0f9dc", :id=>2}]
+    #<Sequel::Amalgalite::Database: "amalgalite://Users/ahoward/.i_can_haz_db/db.sqlite">
+
+
 
 DOCS
   test/main.rb
@@ -457,6 +499,69 @@ DOCS
   API section below
 
 HISTORY
+  4.4.0
+    - support for automatic sequel/sqlite/amalgalite dbs for persistent state
+      across invocations
+
+        Main {
+          db {
+            create_table :foo do
+              String key
+              String val
+            end unless table_exists? :foo
+          }
+
+          def run
+            db[:foo].create(:key => 'using', :val => 'amalgalite')
+          end
+        }
+
+      - support for automatic config files with auto populated template data
+
+          Main {
+            config :email => 'your.addy@gmail.com', :password => 'pa$$word'
+
+            def run
+              email = config[:email]
+            end
+          }
+
+      - new paramter types :pathname, :path, :slug, :input, and :output 
+
+      - input/output parameters.  can be filenames or '-' to supply
+        stdin/stdout respectively
+
+          Main {
+            input :i
+            output :o
+
+            def run
+              i = params[:i].value
+              o = params[:o].value
+
+              line = i.gets
+              o.puts line
+            end
+          }
+
+       - clean up warnings running with 'ruby -w'
+
+       - fix a failing test
+
+       - ability to ignore parameters in sub modes
+
+          Main {
+            argument :foo
+            argument :bar
+
+            def run
+              p param[:bar].value
+            end
+
+            mode :ignoring do
+              params[:foo].ignore!
+            end
+          }
   4.0.0
     - avoid duping ios.  new methods Main.push_ios! and Main.pop_ios! are
     utilized for testing.  this was done to make it simple to wrap

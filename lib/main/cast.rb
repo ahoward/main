@@ -25,7 +25,7 @@ module Main
     end
 
     cast :integer do |obj|
-      Integer obj
+      Float(obj).to_i
     end
 
     cast :float do |obj|
@@ -45,7 +45,7 @@ module Main
     end
 
     cast :uri do |obj|
-      require 'uri'
+      require 'uri' unless defined?(::URI)
       ::URI.parse obj.to_s
     end
 
@@ -55,8 +55,51 @@ module Main
     end
 
     cast :date do |obj|
-      require 'date'
+      require 'date' unless defined?(::Date)
       ::Date.parse obj.to_s
+    end
+
+    cast :pathname do |obj|
+      require 'pathname' unless defined?(::Pathname)
+      Pathname.new(obj.to_s)
+    end
+
+    cast :path do |obj|
+      File.expand_path(obj.to_s)
+    end
+
+    cast :input do |obj|
+      case obj.to_s
+        when '-'
+          io = STDIN.dup
+          io.fattr(:path){ '/dev/stdin' }
+          io
+        else
+          io = open(obj.to_s, 'r+')
+          at_exit{ io.close }
+          io
+      end
+    end
+
+    cast :output do |obj|
+      case obj.to_s
+        when '-'
+          io = STDOUT.dup
+          io.fattr(:path){ '/dev/stdout' }
+          io
+        else
+          io = open(obj.to_s, 'w+')
+          at_exit{ io.close }
+          io
+      end
+    end
+
+    cast :slug do |obj|
+      string = [obj].flatten.compact.join('-')
+      words = string.to_s.scan(%r/\w+/)
+      words.map!{|word| word.gsub %r/[^0-9a-zA-Z_-]/, ''}
+      words.delete_if{|word| word.nil? or word.strip.empty?}
+      String(words.join('-').downcase)
     end
 
     cast :list do |*objs|

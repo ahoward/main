@@ -16,7 +16,7 @@ module Main
 
       %w( 
         program name synopsis description author version
-        exit_status exit_success exit_failure exit_warn
+        exit_status exit_success exit_failure exit_warn exit_warning
         logger_level
         usage
       ).each{|a| fattr(a){ self.class.send a}}
@@ -31,9 +31,9 @@ module Main
       end
 
       %w( debug info warn fatal error ).each do |m|
-        module_eval <<-code
-          def #{ m } *a, &b
-            logger.#{ m } *a, &b
+        module_eval <<-code, __FILE__, __LINE__
+          def #{ m }(*a, &b)
+            logger.#{ m }(*a, &b)
           end
         code
       end
@@ -87,7 +87,6 @@ module Main
       end
 
       def setup_io_restoration
-      return
         @finalizers ||= []
         [STDIN, STDOUT, STDERR].each do |io|
           dup = io.dup
@@ -250,9 +249,9 @@ module Main
       end
 
       %w[ before instead after ].each do |which|
-        module_eval <<-code
-          def error_handler_#{ which } *argv, &block
-            block.call *argv
+        module_eval <<-code, __FILE__, __LINE__
+          def error_handler_#{ which }(*argv, &block)
+            block.call(*argv)
           end
         code
       end
@@ -264,6 +263,26 @@ module Main
           end
         singleton_class.module_eval{ define_method('__instance_eval_block', &block) }
         fcall(self, '__instance_eval_block', *argv, &block)
+      end
+
+      def dotdir(&block)
+        self.class.dotdir(&block)
+      end
+
+      def db(&block)
+        self.class.db(&block)
+      end
+
+      def config(&block)
+        self.class.config(&block)
+      end
+
+      def input
+        @input ||= params[:input].value if params[:input]
+      end
+
+      def output
+        @output ||= params[:output].value if params[:output]
       end
     end
 

@@ -2,7 +2,7 @@ module Main
 #
 # top level constants
 #
-  Main::VERSION = '4.3.0' unless
+  Main::VERSION = '4.4.0' unless
     defined? Main::VERSION
   def self.version() Main::VERSION end
 
@@ -13,6 +13,7 @@ module Main
   Main::EXIT_SUCCESS = 0 unless defined? Main::EXIT_SUCCESS
   Main::EXIT_FAILURE = 1 unless defined? Main::EXIT_FAILURE
   Main::EXIT_WARN = 42 unless defined? Main::EXIT_WARN
+  Main::EXIT_WARNING = 42 unless defined? Main::EXIT_WARNING
 #
 # built-in
 #

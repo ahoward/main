@@ -258,7 +258,7 @@ class T < Test::Unit::TestCase
         }
         option('y'){ 
           argument_required
-          process{|*values| values.join.split(',').map{|value| value.upcase}}
+          cast{|*values| values.join.split(',').map{|value| value.upcase}}
         }
         define_method('run'){ param = params }
       }

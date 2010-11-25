@@ -5,9 +5,9 @@ SYNOPSIS
   a class factory and dsl for generating command line programs real quick
 
 URI
+  http://github.com/ahoward/main
   http://codeforpeople.com/lib/ruby/
   http://rubyforge.org/projects/codeforpeople/
-  http://github.com/ahoward/main
 
 INSTALL
   gem install main
@@ -26,6 +26,8 @@ DESCRIPTION
     - parsing user defined ARGV and ENV
     - zero requirements for understanding the obtuse apis of *any* command
       line option parsers
+    - built-in support for persistent state via sqlite/sequel/amalgalite
+    - built-in support for yaml config files
     - leather pants
 
   in short main.rb aims to drastically lower the barrier to writing uniform
@@ -186,6 +188,82 @@ DOCS
   API section below
 
 HISTORY
+  4.4.0
+    - app storage under a dotdir. for example
+
+        Main {
+          name :foobar
+        }
+
+      will have a ~/.foobar/ directory available for storing db/config/etc.
+
+    - support for automatic sequel/sqlite/amalgalite dbs for persistent state
+    across invocations.  the db is automatically created under the main
+    programs dotdir (~/.$appname/db.sqlite)
+
+        Main {
+          db {
+            create_table :foo do
+              String key
+              String val
+            end unless table_exists? :foo
+          }
+
+          def run
+            db[:foo].create(:key => 'using', :val => 'amalgalite')
+          end
+        }
+
+      - support for automatic config files with auto populated template data.
+      the first time the program is run the user's editor will be invoked on a
+      config file pre-populate with the same config.  subsequent invocations
+      will use the user configured values. the config file is stored at
+      ~/.$appname/config.yml
+
+          Main {
+            config :email => 'your.addy@gmail.com', :password => 'pa$$word'
+
+            def run
+              email = config[:email]
+            end
+          }
+
+      - new paramter types :pathname, :path, :slug, :input, and :output 
+
+      - input/output parameters.  can be filenames or '-' to supply
+        stdin/stdout respectively
+
+          Main {
+            input :i
+            output :o
+
+            def run
+              i = params[:i].value
+              o = params[:o].value
+
+              line = i.gets
+              o.puts line
+            end
+          }
+
+       - clean up warnings running with 'ruby -w'
+
+       - fix a failing test
+
+       - ability to ignore parameters in sub modes
+
+          Main {
+            argument :foo
+            argument :bar
+
+            def run
+              p param[:bar].value
+            end
+
+            mode :ignoring do
+              params[:foo].ignore!
+            end
+          }
   4.0.0
     - avoid duping ios.  new methods Main.push_ios! and Main.pop_ios! are
     utilized for testing.  this was done to make it simple to wrap

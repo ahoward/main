@@ -109,8 +109,13 @@ module Main
       names.first
     end
 
-    def default 
+    def default(*values)
+      defaults(values) unless values.empty?
       defaults.first
+    end
+
+    def default=(value)
+      default(value)
     end
 
     def typename
@@ -247,6 +252,13 @@ module Main
         raise
       end
     end
+
+    def remove
+      main.parameters.delete(self)
+    end
+    alias_method('remove!', 'remove')
+    alias_method('ignore', 'remove')
+    alias_method('ignore!', 'ignore')
 
     class Argument < Parameter
       fattr 'required' => true
@@ -526,6 +538,15 @@ module Main
       def <<(*a)
         delete(*a)
         super
+      end
+
+      def [](*index)
+        first = index.first
+        if(index.size == 1 and (first.is_a?(String) or first.is_a?(Symbol)))
+          first = first.to_s
+          return detect{|param| param.name == first}
+        end
+        return super
       end
     end
 

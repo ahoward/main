@@ -1,20 +1,18 @@
+todo:
+  - examples of new features
+  - use map.rb
 
-* support pathname casts
-* support uri casts
-* support filename casts
-* support directory costs
-* support io cast '-' (:input, :output)
-
-* fix weird super bug jeremy found
-
-* figure out how to support '-' ??
-
-* clean up warnings under 'ruby -w'
-* error reporting weird for some errors
-
-===============================================================================
-X calls to abort sometimes lead to STDERR prining twice ;-(
-X main's' with modes, but no run do not operate properly - add default run w/wrap_run!
-X usage fubar when extra chunks are set
-X usage of arguments is fubar when negative arities are used
-X add sanity checks at parameter contruction completion
+done:
+  - clean up warnings under 'ruby -w'
+  - intput/output arguments
+  - support io cast '-' (:input, :output)
+  - slug casts
+  - support uri casts
+  - dotdir support (based on name)
+  - db support
+  - configuration/configfile file support
+  - calls to abort sometimes lead to STDERR prining twice ;-(
+  - main's' with modes, but no run do not operate properly - add default run w/wrap_run!
+  - usage fubar when extra chunks are set
+  - usage of arguments is fubar when negative arities are used
+  - add sanity checks at parameter contruction completion

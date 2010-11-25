@@ -21,11 +21,11 @@ module Main
       fattr('exit_success'){ Main::EXIT_SUCCESS }
       fattr('exit_failure'){ Main::EXIT_FAILURE }
       fattr('exit_warn'){ Main::EXIT_WARN }
+      fattr('exit_warning'){ Main::EXIT_WARNING }
       fattr('parameters'){ Main::Parameter::List[] }
       fattr('can_has_hash'){ Hash.new }
       fattr('mixin_table'){ Hash.new }
 
-      fattr('factory')
       fattr('argv')
       fattr('env')
       fattr('opts')
@@ -34,6 +34,10 @@ module Main
         Factory.new(&block)
       end
       alias_method 'create', 'factory'
+
+      def factory=(factory)
+        @factory = factory
+      end
 
       class Factory
         def initialize(&block)
@@ -82,6 +86,10 @@ module Main
           post_initialize()
         end
         instance
+      end
+
+      def params
+        parameters
       end
 
       def evaluate(&block)
@@ -182,23 +190,23 @@ module Main
       end
 
       def parameter(*a, &b)
-        (parameters << Parameter.create(:parameter, self, *a, &b)).last
+        (parameters << Parameter.create(:parameter, main=self, *a, &b)).last
       end
 
       def argument(*a, &b)
-        (parameters << Parameter.create(:argument, self, *a, &b)).last
+        (parameters << Parameter.create(:argument, main=self, *a, &b)).last
       end
 
       def option(*a, &b)
-        (parameters << Parameter.create(:option, self, *a, &b)).last
+        (parameters << Parameter.create(:option, main=self, *a, &b)).last
       end
 
       def keyword(*a, &b)
-        (parameters << Parameter.create(:keyword, self, *a, &b)).last
+        (parameters << Parameter.create(:keyword, main=self, *a, &b)).last
       end
 
       def environment(*a, &b)
-        (parameters << Parameter.create(:environment, self, *a, &b)).last
+        (parameters << Parameter.create(:environment, main=self, *a, &b)).last
       end
 
       def default_options!
@@ -258,6 +266,86 @@ module Main
       def run(&block)
         block ||= lambda{}
         define_method(:run, &block) if block
+      end
+
+      def dotdir(*dotdir, &block)
+        @dotdir = File.join(Util.home, ".#{ name }") unless defined?(@dotdir)
+
+        @dotdir = dotdir.join('/') unless dotdir.empty?
+
+        if block
+          require 'fileutils' unless defined?(FileUtils)
+          FileUtils.mkdir_p(@dotdir) unless test(?d, @dotdir)
+          Dir.chdir(&block)
+        else
+          @dotdir
+        end
+      end
+
+      def db(*args, &block)
+        unless defined?(@db)
+          require 'sequel' unless defined?(Sequel)
+          require 'amalgalite' unless defined?(Amalgalite)
+          @db = dotdir{ Sequel.amalgalite(db_path) }
+          @db.instance_eval(&block) if block
+        end
+        @db
+      end
+
+      def db_path(*db_path)
+        @db_path = File.join(dotdir, 'db.sqlite') unless defined?(@db_path)
+        @db_path = File.join(*db_path) unless db_path.empty?
+        @db_path
+      end
+
+      def config(*args, &block)
+        unless defined?(@config)
+          require 'yaml' unless defined?(YAML)
+          if test(?s, config_path)
+            @config = YAML.load(IO.read(config_path))
+          else
+            config = args.last.is_a?(Hash) ? args.last : {}
+            lines = config.to_yaml.split(/\n/)
+            dash = lines.shift
+            open(config_path, 'w') do |fd|
+              fd.puts '### you may need to edit this config!'
+              fd.puts
+              fd.puts lines
+            end
+            editor = ENV['EDITOR'] || ENV['EDIT'] || 'vi'
+            system("#{ editor.inspect } #{ config_path }")
+            @config = YAML.load(IO.read(config_path))
+          end
+        end
+        @config
+      end
+
+      def config_path(*config_path)
+        @config_path = File.join(dotdir, 'config.yml') unless defined?(@config_path)
+        @config_path = File.join(*config_path) unless config_path.empty?
+        @config_path
+      end
+
+      def input(*args, &block)
+        first = args.first
+        args.push(:input) unless(first.is_a?(Symbol) or first.is_a?(String))
+        param = argument(*args, &block)
+        param.cast(:input)
+        param
+      end
+
+      def output(*args, &block)
+        first = args.first
+        args.push(:output) unless(first.is_a?(Symbol) or first.is_a?(String))
+        param = argument(*args, &block)
+        param.cast(:output)
+        param
+      end
+
+      def io(*args)
+        i = input(*[args.shift].compact).default('-')
+        o = output(*[args.shift].compact).default('-')
+        [i, o]
       end
     end
 
