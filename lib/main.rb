@@ -2,7 +2,7 @@ module Main
 #
 # top level constants
 #
-  Main::VERSION = '4.4.0' unless
+  Main::VERSION = '4.5.1' unless
     defined? Main::VERSION
   def self.version() Main::VERSION end
 
@@ -40,6 +40,7 @@ module Main
 
   require 'fattr'
   require 'arrayfields'
+  require 'map'
 #
 # main's own libs
 #

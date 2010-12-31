@@ -80,6 +80,7 @@ task :gemspec do
             spec.test_files = #{ test_files.inspect }
             spec.add_dependency 'fattr', '>= 2.1.0'
             spec.add_dependency 'arrayfields', '>= 4.7.4'
+            spec.add_dependency 'map', '>= 2.0.0'
 
             spec.extensions.push(*#{ extensions.inspect })
 
@@ -92,8 +93,9 @@ task :gemspec do
       }
     end
 
-  open("#{ lib }.gemspec", "w"){|fd| fd.puts template}
-  This.gemspec = "#{ lib }.gemspec"
+  Fu.mkdir_p(This.pkgdir)
+  This.gemspec = File.join(This.pkgdir, "gemspec.rb")
+  open("#{ This.gemspec }", "w"){|fd| fd.puts(template)}
 end
 
 task :gem => [:clean, :gemspec] do
@@ -103,7 +105,7 @@ task :gem => [:clean, :gemspec] do
   `#{ cmd }`
   after = Dir['*.gem']
   gem = ((after - before).first || after.first) or abort('no gem!')
-  Fu.mv gem, This.pkgdir
+  Fu.mv(gem, This.pkgdir)
   This.gem = File.basename(gem)
 end
 

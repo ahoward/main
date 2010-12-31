@@ -302,7 +302,7 @@ module Main
         unless defined?(@config)
           require 'yaml' unless defined?(YAML)
           if test(?s, config_path)
-            @config = YAML.load(IO.read(config_path))
+            @config = Map.for(YAML.load(IO.read(config_path)))
           else
             config = args.last.is_a?(Hash) ? args.last : {}
             lines = config.to_yaml.split(/\n/)
@@ -314,7 +314,7 @@ module Main
             end
             editor = ENV['EDITOR'] || ENV['EDIT'] || 'vi'
             system("#{ editor.inspect } #{ config_path }")
-            @config = YAML.load(IO.read(config_path))
+            @config = Map.for(YAML.load(IO.read(config_path)))
           end
         end
         @config
