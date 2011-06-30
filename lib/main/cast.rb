@@ -103,29 +103,39 @@ module Main
     end
 
     cast :list do |*objs|
-      [*objs].flatten.join(',').split(/,/)
+      [*objs].flatten.join(',').split(/[\n,]/).map{|item| item.strip}.delete_if{|item| item.strip.empty?}
     end
 
-  # add list_of_xxx methods
+# add list_of_xxx methods
+#
     List.dup.each do |type|
       next if type.to_s =~ %r/list/ 
-      m = "list_of_#{ type }"
-      define_method m do |*objs|
-        list(*objs).map{|obj| send type, obj}
+      %W" list_of_#{ type } list_of_#{ type }s ".each do |m|
+        define_method m do |*objs|
+          list(*objs).map{|obj| send type, obj}
+        end
+        export m 
+        List << m
       end
-      export m 
-      List << m
     end
 
-  # add list_of_xxx_from_file
+# add list_of_xxx_from_file
+#
     List.dup.each do |type|
       next if type.to_s =~ %r/list/ 
-      m = "list_of_#{ type }"
-      define_method m do |*objs|
-        list(*objs).map{|obj| send type, obj}
+      %W" list_of_#{ type }_from_file list_of_#{ type }s_from_file ".each do |m|
+        define_method m do |*args|
+          buf = nil
+          if args.size == 1 and args.first.respond_to?(:read)
+            buf = args.first.read
+          else
+            open(*args){|io| buf = io.read}
+          end
+          send(m.sub(/_from_file/, ''), buf)
+        end
+        export m
+        List << m
       end
-      export m 
-      List << m
     end
 
     def self.[] sym

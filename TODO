@@ -1,4 +1,8 @@
 todo:
+  - support run once/singleton pattern via flock/lockfile
+  - config generation support
+
+
   - support for logging/logs too!
   - examples of new features
   - use map.rb
