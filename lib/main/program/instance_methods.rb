@@ -229,7 +229,7 @@ module Main
         end
 
         exit_status(( exit_failure )) if exit_status == exit_success
-        exit_status(( Integer(exit_status) rescue(exit_status ? 0 : 1) ))
+        exit_status(( Util.integer(exit_status) rescue(exit_status ? 0 : 1) ))
       end
 
       def handle_exit(status)

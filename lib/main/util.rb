@@ -7,6 +7,10 @@ module Main
     end
 
     module Methods
+      def integer(value)
+        Float(value).to_i
+      end
+
       def mcp obj
         Marshal.load(Marshal.dump(obj))
       end
