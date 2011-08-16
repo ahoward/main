@@ -812,12 +812,12 @@ class T < Test::Unit::TestCase
     name = 'arity_one_paramter_attr'
     m = nil
     argv = %w( a )
-    assert_nothing_raised{
+    #assert_nothing_raised{
       main(argv.dup) {
         argument(name){ arity 1; attr }
         run{ m = send(name) }
       }
-    }
+    #}
     assert m == argv.first
   end 
   def test_0520

@@ -564,14 +564,14 @@ module Main
       def fattr a = nil, &block
         name = param.name
         a ||= name
-        b = fattr_block_for name, &block 
+        b = fattr_block_for(name, &block)
         @param.main.module_eval{ fattr(*a, &b) }
       end
       alias_method 'attribute', 'fattr'
 
       def fattr_block_for name, &block
         block ||= lambda{|param| [0,1].include?(param.arity) ? param.value : param.values }
-        lambda{ block.call self.param[name] }
+        lambda{|*args| block.call(self.param[name]) }
       end
 
       def attr(*a, &b)
