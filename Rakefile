@@ -63,7 +63,7 @@ end
 task :gemspec do
   ignore_extensions = ['git', 'svn', 'tmp', /sw./, 'bak', 'gem']
   ignore_directories = ['pkg']
-  ignore_files = ['test/log']
+  ignore_files = ['test/log', 'a.rb']
 
   shiteless = 
     lambda do |list|
