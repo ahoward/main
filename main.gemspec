@@ -3,7 +3,7 @@
 
 Gem::Specification::new do |spec|
   spec.name = "main"
-  spec.version = "4.7.2"
+  spec.version = "4.7.3"
   spec.platform = Gem::Platform::RUBY
   spec.summary = "main"
   spec.description = "description: main kicks the ass"
@@ -14,7 +14,6 @@ Gem::Specification::new do |spec|
  "README.erb",
  "Rakefile",
  "TODO",
- "a.rb",
  "lib",
  "lib/main",
  "lib/main.rb",
@@ -61,7 +60,7 @@ Gem::Specification::new do |spec|
   
     spec.add_dependency(*["arrayfields", "~> 4.7.4"])
   
-    spec.add_dependency(*["chronic", "~> 0.3.0"])
+    spec.add_dependency(*["chronic", "~> 0.6.2"])
   
 
   spec.extensions.push(*[])

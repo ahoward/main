@@ -79,8 +79,12 @@ module Main
             when ::Logger, Logger
               @logger = log
             else
-              @logger = Logger.new(*log)
-              @logger.level = logger_level
+              if log.is_a?(Array)
+                @logger = Logger.new(*log)
+              else
+                @logger = Logger.new(log)
+                @logger.level = logger_level
+              end
           end
         end
         @logger

@@ -891,6 +891,20 @@ class T < Test::Unit::TestCase
     }
     assert( src==dst, "appears finalizer did not run!?" )
   end
+
+# logging
+#
+  def test_0700
+    argv = []
+    logger = nil 
+    assert_nothing_raised{
+      main(argv){
+        define_method('run'){ self.logger = STDERR; logger = self.logger }
+      }
+    }
+    assert( logger.class==Main::Logger, "setting logger did not work" )
+    assert( logger.device==STDERR, "setting logger did not work" )
+  end
 end
 
 
