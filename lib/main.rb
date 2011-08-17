@@ -1,8 +1,7 @@
 module Main
-#
 # top level constants
 #
-  Main::VERSION = '4.7.1' unless
+  Main::VERSION = '4.7.2' unless
     defined? Main::VERSION
   def self.version() Main::VERSION end
 
@@ -14,7 +13,41 @@ module Main
   Main::EXIT_FAILURE = 1 unless defined? Main::EXIT_FAILURE
   Main::EXIT_WARN = 42 unless defined? Main::EXIT_WARN
   Main::EXIT_WARNING = 42 unless defined? Main::EXIT_WARNING
+
+## deps
 #
+  def Main.dependencies
+    {
+      'chronic'     => [ 'chronic'     , '~> 0.6.2' ] , 
+      'fattr'       => [ 'fattr'       , '~> 2.2.0' ] , 
+      'arrayfields' => [ 'arrayfields' , '~> 4.7.4' ] , 
+      'map'         => [ 'map'         , '~> 4.3.0' ]
+    }
+  end
+
+  def Main.libdir(*args, &block)
+    @libdir ||= File.expand_path(__FILE__).sub(/\.rb$/,'')
+    args.empty? ? @libdir : File.join(@libdir, *args)
+  ensure
+    if block
+      begin
+        $LOAD_PATH.unshift(@libdir)
+        block.call()
+      ensure
+        $LOAD_PATH.shift()
+      end
+    end
+  end
+
+  def Main.load(*libs)
+    libs = libs.join(' ').scan(/[^\s+]+/)
+    Main.libdir{ libs.each{|lib| Kernel.load(lib) } }
+  end
+end
+ 
+
+
+
 # built-in
 #
   require 'logger'
@@ -23,7 +56,7 @@ module Main
   require 'uri'
   require 'time'
   require 'date'
-#
+ 
 # use gems to pick up dependancies
 #
   begin
@@ -32,27 +65,25 @@ module Main
     42
   end
 
-  begin
-    require 'chronic'
-  rescue LoadError
-    42
+  if defined?(gem)
+    Main.dependencies.each do |lib, dependency|
+      gem(*dependency)
+      require(lib)
+    end
   end
-
-  require 'fattr'
-  require 'arrayfields'
-  require 'map'
-#
+ 
 # main's own libs
 #
-  require libdir + 'stdext'
-  require libdir + 'softspoken'
-  require libdir + 'util'
-  require libdir + 'logger'
-  require libdir + 'usage'
-  require libdir + 'cast'
-  require libdir + 'parameter'
-  require libdir + 'getoptlong'
-  require libdir + 'mode'
-  require libdir + 'program'
-  require libdir + 'factories'
-end
+  Main.load %w[
+    stdext.rb
+    softspoken.rb
+    util.rb
+    logger.rb
+    usage.rb
+    cast.rb
+    parameter.rb
+    getoptlong.rb
+    mode.rb
+    program.rb
+    factories.rb
+  ]
