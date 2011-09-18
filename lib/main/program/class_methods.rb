@@ -304,9 +304,18 @@ module Main
           if test(?s, config_path)
             @config = Map.for(YAML.load(IO.read(config_path)))
           else
-            config = args.last.is_a?(Hash) ? args.last : {}
+            config =
+              case args.last
+                when Hash
+                  args.last
+                when String
+                  YAML.parse(Util.unindent(args.last))
+                else
+                {}
+              end
             lines = config.to_yaml.split(/\n/)
             dash = lines.shift
+            FileUtils.mkdir_p(File.dirname(config_path))
             open(config_path, 'w') do |fd|
               fd.puts '### you may need to edit this config!'
               fd.puts
@@ -319,6 +328,7 @@ module Main
         end
         @config
       end
+      alias_method('edit_config_file!', 'config')
 
       def config_path(*config_path)
         @config_path = File.join(dotdir, 'config.yml') unless defined?(@config_path)
