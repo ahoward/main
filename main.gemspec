@@ -3,7 +3,7 @@
 
 Gem::Specification::new do |spec|
   spec.name = "main"
-  spec.version = "4.7.5"
+  spec.version = "4.7.6"
   spec.platform = Gem::Platform::RUBY
   spec.summary = "main"
   spec.description = "description: main kicks the ass"
