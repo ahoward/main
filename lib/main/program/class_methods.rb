@@ -304,20 +304,21 @@ module Main
           if test(?s, config_path)
             @config = Map.for(YAML.load(IO.read(config_path)))
           else
-            config =
-              case args.last
+            config = args.last
+            lines =
+              case config
                 when Hash
-                  args.last
+                  config.to_yaml.split(/\n/)
                 when String
-                  YAML.parse(Util.unindent(args.last))
+                  Util.unindent(config)
                 else
-                {}
+                  []
               end
-            lines = config.to_yaml.split(/\n/)
-            dash = lines.shift
+            dash = lines.shift if lines.first.to_s =~ /^---/
             FileUtils.mkdir_p(File.dirname(config_path))
             open(config_path, 'w') do |fd|
-              fd.puts '### you may need to edit this config!'
+              fd.puts "## file: #{ config_path }"
+              fd.puts "#"
               fd.puts
               fd.puts lines
             end
