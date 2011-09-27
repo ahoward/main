@@ -310,7 +310,7 @@ module Main
                 when Hash
                   config.to_yaml.split(/\n/)
                 when String
-                  Util.unindent(config)
+                  Util.unindent(config).split(/\n/)
                 else
                   []
               end
