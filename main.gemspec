@@ -54,13 +54,13 @@ Gem::Specification::new do |spec|
   spec.test_files = nil
 
   
-    spec.add_dependency(*["fattr", "~> 2.2.0"])
+    spec.add_dependency(*["chronic", "~> 0.6.2"])
   
-    spec.add_dependency(*["map", "~> 4.3.0"])
+    spec.add_dependency(*["fattr", "~> 2.2.0"])
   
     spec.add_dependency(*["arrayfields", "~> 4.7.4"])
   
-    spec.add_dependency(*["chronic", "~> 0.6.2"])
+    spec.add_dependency(*["map", "~> 5.1.0"])
   
 
   spec.extensions.push(*[])

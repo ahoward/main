@@ -18,10 +18,10 @@ module Main
 #
   def Main.dependencies
     {
-      'chronic'     => [ 'chronic'     , '~> 0.6.2' ] , 
-      'fattr'       => [ 'fattr'       , '~> 2.2.0' ] , 
-      'arrayfields' => [ 'arrayfields' , '~> 4.7.4' ] , 
-      'map'         => [ 'map'         , '~> 4.3.0' ]
+      'chronic'     => [ 'chronic'     , '~> 0.6.2' ] ,
+      'fattr'       => [ 'fattr'       , '~> 2.2.0' ] ,
+      'arrayfields' => [ 'arrayfields' , '~> 4.7.4' ] ,
+      'map'         => [ 'map'         , '~> 5.1.0' ]
     }
   end
 
@@ -44,7 +44,7 @@ module Main
     Main.libdir{ libs.each{|lib| Kernel.load(lib) } }
   end
 end
- 
+
 
 
 
@@ -56,7 +56,7 @@ end
   require 'uri'
   require 'time'
   require 'date'
- 
+
 # use gems to pick up dependancies
 #
   begin
@@ -71,7 +71,7 @@ end
       require(lib)
     end
   end
- 
+
 # main's own libs
 #
   Main.load %w[
