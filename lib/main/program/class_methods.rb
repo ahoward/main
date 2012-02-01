@@ -323,7 +323,7 @@ module Main
               fd.puts lines
             end
             editor = ENV['EDITOR'] || ENV['EDIT'] || 'vi'
-            system("#{ editor.inspect } #{ config_path }")
+            system("#{ editor } #{ config_path }")
             @config = Map.for(YAML.load(IO.read(config_path)))
           end
         end
