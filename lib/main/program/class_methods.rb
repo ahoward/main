@@ -304,6 +304,7 @@ module Main
           if test(?s, config_path)
             @config = Map.for(YAML.load(IO.read(config_path)))
           else
+            require 'fileutils' unless defined?(FileUtils)
             config = args.last
             lines =
               case config
