@@ -18,10 +18,10 @@ module Main
 #
   def Main.dependencies
     {
-      'chronic'     => [ 'chronic'     , '=> 0.6.2' ] ,
-      'fattr'       => [ 'fattr'       , '=> 2.2.0' ] ,
-      'arrayfields' => [ 'arrayfields' , '=> 4.7.4' ] ,
-      'map'         => [ 'map'         , '=> 5.1.0' ]
+      'chronic'     => [ 'chronic'     , '>= 0.6.2' ] ,
+      'fattr'       => [ 'fattr'       , '>= 2.2.0' ] ,
+      'arrayfields' => [ 'arrayfields' , '>= 4.7.4' ] ,
+      'map'         => [ 'map'         , '>= 5.1.0' ]
     }
   end
 
