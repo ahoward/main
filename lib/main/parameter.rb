@@ -390,7 +390,7 @@ module Main
                GetoptLong::MissingArgument, GetoptLong::InvalidOption => e
           c = Parameter.const_get e.class.name.split(/::/).last
           ex = c.new e.message
-          ex.set_backtrace e.message
+          ex.set_backtrace e.backtrace
           ex.extend Softspoken
           raise ex
         end
