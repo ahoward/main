@@ -269,8 +269,8 @@ module Main
         fcall(self, '__instance_eval_block', *argv, &block)
       end
 
-      def dotdir(&block)
-        self.class.dotdir(&block)
+      def state_path(&block)
+        self.class.state_path(&block)
       end
 
       def db(&block)
