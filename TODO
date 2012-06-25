@@ -13,7 +13,7 @@ done:
   - support io cast '-' (:input, :output)
   - slug casts
   - support uri casts
-  - dotdir support (based on name)
+  - state_path support (based on name)
   - db support
   - configuration/configfile file support
   - calls to abort sometimes lead to STDERR prining twice ;-(

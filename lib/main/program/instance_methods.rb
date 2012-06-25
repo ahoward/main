@@ -203,6 +203,10 @@ module Main
         (params['help'] and params['help'].given?) or argv.first == 'help'
       end
 
+      def state_path?
+        (params['state_path'] and params['state_path'].given?) or argv.first == 'state_path'
+      end
+
       def abort(message = 'exit')
         raise SystemExit.new(message)
       end
@@ -269,8 +273,8 @@ module Main
         fcall(self, '__instance_eval_block', *argv, &block)
       end
 
-      def dotdir(&block)
-        self.class.dotdir(&block)
+      def state_path(&block)
+        self.class.state_path(&block)
       end
 
       def db(&block)
