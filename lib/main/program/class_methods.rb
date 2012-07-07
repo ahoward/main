@@ -268,17 +268,17 @@ module Main
         define_method(:run, &block) if block
       end
 
-      def dotdir(*dotdir, &block)
-        @dotdir = File.join(Util.home, ".#{ name }") unless defined?(@dotdir)
+      def state_path(*state_path, &block)
+        @state_path = File.join(Util.home, ".#{ name }") unless defined?(@state_path)
 
-        @dotdir = dotdir.join('/') unless dotdir.empty?
+        @state_path = state_path.join('/') unless state_path.empty?
 
         if block
           require 'fileutils' unless defined?(FileUtils)
-          FileUtils.mkdir_p(@dotdir) unless test(?d, @dotdir)
+          FileUtils.mkdir_p(@state_path) unless test(?d, @state_path)
           Dir.chdir(&block)
         else
-          @dotdir
+          @state_path
         end
       end
 
@@ -286,14 +286,14 @@ module Main
         unless defined?(@db)
           require 'sequel' unless defined?(Sequel)
           require 'amalgalite' unless defined?(Amalgalite)
-          @db = dotdir{ Sequel.amalgalite(db_path) }
+          @db = state_path{ Sequel.amalgalite(db_path) }
           @db.instance_eval(&block) if block
         end
         @db
       end
 
       def db_path(*db_path)
-        @db_path = File.join(dotdir, 'db.sqlite') unless defined?(@db_path)
+        @db_path = File.join(state_path, 'db.sqlite') unless defined?(@db_path)
         @db_path = File.join(*db_path) unless db_path.empty?
         @db_path
       end
@@ -332,7 +332,7 @@ module Main
       alias_method('edit_config_file!', 'config')
 
       def config_path(*config_path)
-        @config_path = File.join(dotdir, 'config.yml') unless defined?(@config_path)
+        @config_path = File.join(state_path, 'config.yml') unless defined?(@config_path)
         @config_path = File.join(*config_path) unless config_path.empty?
         @config_path
       end
