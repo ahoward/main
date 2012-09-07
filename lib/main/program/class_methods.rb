@@ -268,9 +268,21 @@ module Main
         define_method(:run, &block) if block
       end
 
+      def state_dirname(*args)
+        @state_dirname = File.join(*args) unless args.empty? 
+        @state_dirname ||= ENV['STATE_DIRNAME']
+        @state_dirname ||= Util.home
+        @state_dirname
+      end
+
+      def state_basename(*args)
+        @state_basename = File.join(*args) unless args.empty? 
+        @state_basename ||= ENV['STATE_BASENAME']
+        @state_basename ||= ".#{ name }"
+        @state_basename
+      end
+
       def state_path(*state_path, &block)
-        state_dirname = ENV['STATE_DIRNAME'] || Util.home
-        state_basename = ENV['STATE_BASENAME'] || ".#{ name }"
         @state_path = File.join(state_dirname, state_basename) unless defined?(@state_path)
 
         @state_path = state_path.join('/') unless state_path.empty?
