@@ -269,7 +269,9 @@ module Main
       end
 
       def state_path(*state_path, &block)
-        @state_path = File.join(Util.home, ".#{ name }") unless defined?(@state_path)
+        state_dirname = ENV['STATE_DIRNAME'] || Util.home
+        state_basename = ENV['STATE_BASENAME'] || ".#{ name }"
+        @state_path = File.join(state_dirname, state_basename) unless defined?(@state_path)
 
         @state_path = state_path.join('/') unless state_path.empty?
 
@@ -315,6 +317,7 @@ module Main
                   []
               end
             dash = lines.shift if lines.first.to_s =~ /^---/
+            require 'fileutils' unless defined?(FileUtils)
             FileUtils.mkdir_p(File.dirname(config_path))
             open(config_path, 'w') do |fd|
               fd.puts "## file: #{ config_path }"
