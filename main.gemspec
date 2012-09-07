@@ -3,7 +3,7 @@
 
 Gem::Specification::new do |spec|
   spec.name = "main"
-  spec.version = "5.0.0"
+  spec.version = "5.1.0"
   spec.platform = Gem::Platform::RUBY
   spec.summary = "main"
   spec.description = "description: main kicks the ass"

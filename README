@@ -499,6 +499,10 @@ DOCS
   API section below
 
 HISTORY
+  5.1.0
+    - support for STATE_DIRNAME and STATE_BASENAME environment variables
+  5.0.0
+    ?
   4.4.0
     - support for automatic sequel/sqlite/amalgalite dbs for persistent state
       across invocations
