@@ -456,6 +456,36 @@ class T < Test::Unit::TestCase
       }
     }
   end
+
+# manual parmeter setting
+#
+  def test_0272
+    assert_nothing_raised{
+      h = {}
+
+      main(){
+        argument(:foo){ optional }
+        run do
+          o = param['foo']
+          h[nil] = o.value
+
+          o.set 'bar'
+          h['bar'] = o.value
+
+          o.set ['bar']
+          h[['bar']] = o.value
+
+          o.set 'foo', 'bar' 
+          h['foo'] = o.value
+          h[['foo', 'bar']] = o.values
+        end
+      }
+
+      h.each do |expected, actual|
+        assert_equal expected, actual
+      end
+    }
+  end
  
 # usage
 #

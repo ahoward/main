@@ -128,8 +128,20 @@ module Main
       values << value
     end
 
+    def set(*values)
+      self.values.replace(values)
+    end
+
+    def get
+      self.values.first
+    end
+
     def value
       values.first
+    end
+
+    def value=(value)
+      set(value)
     end
 
     def argument_none?
