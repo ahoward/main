@@ -3,7 +3,7 @@
 
 Gem::Specification::new do |spec|
   spec.name = "main"
-  spec.version = "5.1.0"
+  spec.version = "5.2.0"
   spec.platform = Gem::Platform::RUBY
   spec.summary = "main"
   spec.description = "description: main kicks the ass"
@@ -14,6 +14,7 @@ Gem::Specification::new do |spec|
  "README.erb",
  "Rakefile",
  "TODO",
+ "db",
  "lib",
  "lib/main",
  "lib/main.rb",
@@ -34,6 +35,7 @@ Gem::Specification::new do |spec|
  "lib/main/usage.rb",
  "lib/main/util.rb",
  "main.gemspec",
+ "out",
  "samples",
  "samples/a.rb",
  "samples/b.rb",
