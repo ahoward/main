@@ -272,6 +272,7 @@ module Main
       def state_path(&block)
         self.class.state_path(&block)
       end
+      alias_method('dotdir', 'state_path')
 
       def db(&block)
         self.class.db(&block)

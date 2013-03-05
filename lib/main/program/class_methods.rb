@@ -295,6 +295,7 @@ module Main
           @state_path
         end
       end
+      alias_method('dotdir', 'state_path')
 
       def db(*args, &block)
         unless defined?(@db)
