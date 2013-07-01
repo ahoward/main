@@ -68,9 +68,10 @@ module Main
       File.expand_path(obj.to_s)
     end
 
-    cast :input do |obj|
+    stdin = proc do |obj| 
+      require 'fattr' unless defined?(Fattr)
       case obj.to_s
-        when '-'
+        when '-', 'stdin'
           io = STDIN.dup
           io.fattr(:path){ '/dev/stdin' }
           io
@@ -80,10 +81,13 @@ module Main
           io
       end
     end
+    cast(:stdin, &stdin)
+    cast(:input, &stdin)
 
-    cast :output do |obj|
+    stdout = proc do |obj|
+      require 'fattr' unless defined?(Fattr)
       case obj.to_s
-        when '-'
+        when '-', 'stdout'
           io = STDOUT.dup
           io.fattr(:path){ '/dev/stdout' }
           io
@@ -93,6 +97,8 @@ module Main
           io
       end
     end
+    cast(:stdout, &stdout)
+    cast(:output, &stdout)
 
     cast :slug do |obj|
       string = [obj].flatten.compact.join('-')
@@ -148,6 +154,10 @@ module Main
         candidates.empty? or m.to_s == sym.to_s
       this = self
       lambda{|obj| method(m).call obj}
+    end
+
+    def Cast.cast(which, *args, &block)
+      Cast.send(which, *args, &block)
     end
   end
 end
