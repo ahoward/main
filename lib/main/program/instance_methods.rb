@@ -203,6 +203,13 @@ module Main
         (params['help'] and params['help'].given?) or argv.first == 'help'
       end
 
+      def shell!
+        Pry.hooks.clear_all
+        prompt = "#{ name } > "
+        Pry.config.prompt = proc{|*a| prompt } 
+        binding.pry
+      end
+
       def abort(message = 'exit')
         raise SystemExit.new(message)
       end
