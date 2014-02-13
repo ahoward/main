@@ -6,7 +6,7 @@ Gem::Specification::new do |spec|
   spec.version = "5.2.0"
   spec.platform = Gem::Platform::RUBY
   spec.summary = "main"
-  spec.description = "description: main kicks the ass"
+  spec.description = "a class factory and dsl for generating command line programs real quick"
 
   spec.files =
 ["LICENSE",
