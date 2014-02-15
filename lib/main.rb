@@ -1,9 +1,13 @@
 module Main
 # top level constants
 #
-  Main::VERSION = '5.3.0' unless
+  Main::VERSION = '5.3.1' unless
     defined? Main::VERSION
-  def self.version() Main::VERSION end
+  def Main.version() Main::VERSION end
+
+  def Main.description
+    'a class factory and dsl for generating command line programs real quick'
+  end
 
   Main::LIBDIR = File.join(File.dirname(File.expand_path(__FILE__)), self.name.downcase, '') unless
     defined? Main::LIBDIR
