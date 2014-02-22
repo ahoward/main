@@ -3,7 +3,7 @@
 
 Gem::Specification::new do |spec|
   spec.name = "main"
-  spec.version = "5.3.1"
+  spec.version = "5.3.2"
   spec.platform = Gem::Platform::RUBY
   spec.summary = "main"
   spec.description = "a class factory and dsl for generating command line programs real quick"
@@ -55,8 +55,17 @@ Gem::Specification::new do |spec|
 
   spec.test_files = nil
 
-### spec.add_dependency 'lib', '>= version'
-#### spec.add_dependency 'map'
+  
+    spec.add_dependency(*["chronic", ">= 0.6.2"])
+  
+    spec.add_dependency(*["fattr", ">= 2.2.0"])
+  
+    spec.add_dependency(*["arrayfields", ">= 4.7.4"])
+  
+    spec.add_dependency(*["map", ">= 5.1.0"])
+  
+    spec.add_dependency(*["pry", ">= 0.9"])
+  
 
   spec.extensions.push(*[])
 

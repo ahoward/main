@@ -104,39 +104,51 @@ task :gemspec do
   end
   extensions = [extensions].flatten.compact
 
+  if This.dependencies.nil?
+    dependencies = []
+  else
+    case This.dependencies
+      when Hash
+        dependencies = This.dependencies.values
+      when Array
+        dependencies = This.dependencies
+    end
+  end
+
   template = 
     if test(?e, 'gemspec.erb')
       Template{ IO.read('gemspec.erb') }
     else
       Template {
         <<-__
-          ## #{ lib }.gemspec
+          ## <%= lib %>.gemspec
           #
 
           Gem::Specification::new do |spec|
-            spec.name = #{ lib.inspect }
-            spec.version = #{ version.inspect }
+            spec.name = <%= lib.inspect %>
+            spec.version = <%= version.inspect %>
             spec.platform = Gem::Platform::RUBY
-            spec.summary = #{ lib.inspect }
-            spec.description = #{ description.inspect }
-            spec.license = #{ license.inspect }
+            spec.summary = <%= lib.inspect %>
+            spec.description = <%= description.inspect %>
+            spec.license = <%= license.inspect %>
 
-            spec.files =\n#{ files.sort.pretty_inspect }
-            spec.executables = #{ executables.inspect }
+            spec.files =\n<%= files.sort.pretty_inspect %>
+            spec.executables = <%= executables.inspect %>
             
             spec.require_path = "lib"
 
-            spec.test_files = #{ test_files.inspect }
+            spec.test_files = <%= test_files.inspect %>
 
-          ### spec.add_dependency 'lib', '>= version'
-          #### spec.add_dependency 'map'
+            <% dependencies.each do |lib_version| %>
+              spec.add_dependency(*<%= Array(lib_version).flatten.inspect %>)
+            <% end %>
 
-            spec.extensions.push(*#{ extensions.inspect })
+            spec.extensions.push(*<%= extensions.inspect %>)
 
-            spec.rubyforge_project = #{ This.rubyforge_project.inspect }
-            spec.author = #{ This.author.inspect }
-            spec.email = #{ This.email.inspect }
-            spec.homepage = #{ This.homepage.inspect }
+            spec.rubyforge_project = <%= This.rubyforge_project.inspect %>
+            spec.author = <%= This.author.inspect %>
+            spec.email = <%= This.email.inspect %>
+            spec.homepage = <%= This.homepage.inspect %>
           end
         __
       }
@@ -271,6 +283,12 @@ BEGIN {
     version = This.object.send(:version)
   end
   This.version = version
+
+# see if dependencies are export by the module
+#
+  if This.object.respond_to?(:dependencies)
+    This.dependencies = This.object.dependencies
+  end
 
 # we need to know the name of the lib an it's version
 #
