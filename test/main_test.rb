@@ -935,6 +935,20 @@ class T < Test::Unit::TestCase
     assert( logger.class==Main::Logger, "setting logger did not work" )
     assert( logger.device==STDERR, "setting logger did not work" )
   end
+
+# argv with a '--' behavior
+#
+  def test_0800
+    a = nil
+    assert_nothing_raised{
+      main(%w[arg --foo=42 -- --bar]){
+        argument('arg')
+        option('--foo=foo')
+        define_method('run'){ a = @argv }
+      }
+    }
+    assert a == ["--", "--bar"]
+  end
 end
 
 

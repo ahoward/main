@@ -357,7 +357,7 @@ module Main
         defaults!
         validate!
 
-        argv.push(*ignore[1..-1]) unless ignore.empty? 
+        argv.push(*ignore) unless ignore.empty? 
 
         return self
       ensure

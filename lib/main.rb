@@ -1,7 +1,7 @@
 module Main
 # top level constants
 #
-  Main::VERSION = '5.3.2' unless
+  Main::VERSION = '6.0.0' unless
     defined? Main::VERSION
   def Main.version() Main::VERSION end
 
@@ -26,7 +26,6 @@ module Main
       'fattr'       => [ 'fattr'       , '>= 2.2.0' ] ,
       'arrayfields' => [ 'arrayfields' , '>= 4.7.4' ] ,
       'map'         => [ 'map'         , '>= 5.1.0' ] ,
-      'pry'         => [ 'pry'         , '>= 0.9'   ] ,
     }
   end
 
