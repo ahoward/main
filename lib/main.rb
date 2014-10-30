@@ -1,7 +1,7 @@
 module Main
 # top level constants
 #
-  Main::VERSION = '6.0.0' unless
+  Main::VERSION = '6.1.0' unless
     defined? Main::VERSION
   def Main.version() Main::VERSION end
 
@@ -90,4 +90,5 @@ end
     mode.rb
     program.rb
     factories.rb
+    daemon.rb
   ]

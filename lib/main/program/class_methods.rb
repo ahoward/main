@@ -3,6 +3,7 @@ module Main
     module ClassMethods
       fattr('name'){ File.basename($0) }
       fattr('program'){ File.basename($0) }
+      fattr('script'){ File.expand_path(*[script=$0, cwd=ENV['PWD']].compact) }
       fattr('synopsis'){ Main::Usage.default_synopsis(self) }
       fattr('description')
       fattr('usage'){ Main::Usage.default_usage(self) }
@@ -373,6 +374,16 @@ module Main
         i = input(*[args.shift].compact).default('-')
         o = output(*[args.shift].compact).default('-')
         [i, o]
+      end
+
+      def daemonizes!(*args)
+        mode(:daemon){
+          run {
+            cmd = argv.shift || :usage
+
+            daemon.cmd(cmd)
+          }
+        }
       end
     end
 

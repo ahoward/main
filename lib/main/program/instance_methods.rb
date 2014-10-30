@@ -11,6 +11,7 @@ module Main
       fattr('stdout'){ main.stdout }
       fattr('stderr'){ main.stderr }
       fattr('logger'){ main.logger }
+      fattr('script'){ main.script }
       fattr('params')
       fattr('finalizers')
 
@@ -295,6 +296,10 @@ module Main
 
       def output
         @output ||= params[:output].value if params[:output]
+      end
+
+      def daemon
+        @daemon ||= Main::Daemon.new(self)
       end
     end
 
