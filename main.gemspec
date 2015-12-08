@@ -3,7 +3,7 @@
 
 Gem::Specification::new do |spec|
   spec.name = "main"
-  spec.version = "6.1.0"
+  spec.version = "6.2.0"
   spec.platform = Gem::Platform::RUBY
   spec.summary = "main"
   spec.description = "a class factory and dsl for generating command line programs real quick"
@@ -63,7 +63,7 @@ Gem::Specification::new do |spec|
   
     spec.add_dependency(*["arrayfields", ">= 4.7.4"])
   
-    spec.add_dependency(*["map", ">= 5.1.0"])
+    spec.add_dependency(*["map", ">= 6.1.0"])
   
 
   spec.extensions.push(*[])

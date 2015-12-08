@@ -433,6 +433,7 @@ class T < Test::Unit::TestCase
     assert bar.value == 2 
     assert foobar.value == 'foobar' 
   end
+
   def test_0270
     foo = nil
     assert_nothing_raised{
@@ -948,6 +949,57 @@ class T < Test::Unit::TestCase
       }
     }
     assert a == ["--", "--bar"]
+  end
+
+# main_env
+#
+  def test_0900
+    %w[ STATE STATE_DIRNAME STATE_BASENAME ].each do |key|
+      value = nil
+      assert_nothing_raised{
+        main([], key => '42'){
+          define_method('run'){ 
+            k = key.downcase
+            value = main_env[k]
+          }
+        }
+      }
+      assert value == '42'
+    end
+  end
+  def test_0910
+    %w[ MAIN_STATE MAIN_STATE_DIRNAME MAIN_STATE_BASENAME ].each do |key|
+      value = nil
+      assert_nothing_raised{
+        main([], key => '42'){
+          define_method('run'){ 
+            k = key.downcase.sub('main_', '')
+            value = main_env[k]
+          }
+        }
+      }
+      assert value == '42'
+    end
+  end
+  def test_0920
+    %w[ STATE MAIN_STATE ].each do |key|
+      dir = File.expand_path(".main-test-#{ Process.pid }-#{ (rand*1000000000000).to_i }")
+      FileUtils.mkdir_p(dir)
+      begin
+        values = [] 
+        assert_nothing_raised{
+          main([], key => dir){
+            define_method('run'){ 
+              values.push state_path
+              state_path{ values.push File.expand_path(Dir.pwd) }
+            }
+          }
+        }
+        assert values == [dir, dir]
+      ensure
+        FileUtils.rm_rf(dir)
+      end
+    end
   end
 end
 

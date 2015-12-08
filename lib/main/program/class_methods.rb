@@ -269,29 +269,66 @@ module Main
         define_method(:run, &block) if block
       end
 
+      def main_env(*args, &block)
+        @main_env ||= main_env! 
+
+        if args.empty?
+          @main_env
+        else
+          key = main_env_key_for(args.first)
+          @main_env[key]
+        end
+      end
+
+      def main_env_key_for(key)
+        key.to_s.strip.downcase.sub(/^main_/, '')
+      end
+
+      def main_env!
+        @main_env = Map.new
+
+        @main_env[:state]          = env['STATE']
+        @main_env[:state_dirname]  = env['STATE_DIRNAME']
+        @main_env[:state_basename] = env['STATE_BASENAME']
+
+        env.each do |key, val|
+          next unless key.to_s =~ /^\s*MAIN_/i
+          k = main_env_key_for(key)
+          @main_env[k] = val
+        end
+
+        @main_env
+      end
+
       def state_dirname(*args)
         @state_dirname = File.join(*args) unless args.empty? 
-        @state_dirname ||= ENV['STATE_DIRNAME']
+        @state_dirname ||= main_env('STATE_DIRNAME')
         @state_dirname ||= Util.home
         @state_dirname
       end
 
       def state_basename(*args)
         @state_basename = File.join(*args) unless args.empty? 
-        @state_basename ||= ENV['STATE_BASENAME']
+        @state_basename ||= main_env('STATE_BASENAME')
         @state_basename ||= ".#{ name }"
         @state_basename
       end
 
       def state_path(*state_path, &block)
-        @state_path = File.join(state_dirname, state_basename) unless defined?(@state_path)
-
-        @state_path = state_path.join('/') unless state_path.empty?
+        unless defined?(@state_path)
+          if main_env('STATE')
+            @state_path = File.expand_path(main_env('STATE'))
+            @state_dirname = File.dirname(@state_path)
+            @state_basename = File.basename(@state_path)
+          else
+            @state_path = File.join(state_dirname, state_basename)
+          end
+        end
 
         if block
           require 'fileutils' unless defined?(FileUtils)
           FileUtils.mkdir_p(@state_path) unless test(?d, @state_path)
-          Dir.chdir(&block)
+          Dir.chdir(@state_path, &block)
         else
           @state_path
         end

@@ -277,6 +277,10 @@ module Main
         fcall(self, '__instance_eval_block', *argv, &block)
       end
 
+      def main_env(*args, &block)
+        self.class.main_env(*args, &block)
+      end
+
       def state_path(&block)
         self.class.state_path(&block)
       end
