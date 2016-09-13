@@ -1,7 +1,7 @@
 module Main
 # top level constants
 #
-  Main::VERSION = '6.2.0' unless
+  Main::VERSION = '6.2.1' unless
     defined? Main::VERSION
   def Main.version() Main::VERSION end
 
@@ -22,10 +22,10 @@ module Main
 #
   def Main.dependencies
     {
-      'chronic'     => [ 'chronic'     , '>= 0.6.2' ] ,
-      'fattr'       => [ 'fattr'       , '>= 2.2.0' ] ,
-      'arrayfields' => [ 'arrayfields' , '>= 4.7.4' ] ,
-      'map'         => [ 'map'         , '>= 6.1.0' ] ,
+      'chronic'     => [ 'chronic', '~> 0.6', '>= 0.6.2' ] ,
+      'fattr'       => [ 'fattr', '~> 2.2', '>= 2.2.0' ] ,
+      'arrayfields' => [ 'arrayfields', '~> 4.7', '>= 4.7.4' ] ,
+      'map'         => [ 'map', '~> 6.1', '>= 6.1.0' ] ,
     }
   end
 

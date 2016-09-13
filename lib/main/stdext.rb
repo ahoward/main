@@ -14,7 +14,7 @@ private
   def abort(message = nil)
     if message
       message = message.to_s
-      message.singleton_class{ fattr 'abort' => true }
+      message.singleton_class{ fattr 'abort' => true } unless message.frozen?
       STDERR.puts message
     end
     exit 1
@@ -27,7 +27,7 @@ module Process
     def abort(message = nil)
       if message
         message = message.to_s
-        message.singleton_class{ fattr 'abort' => true }
+        message.singleton_class{ fattr 'abort' => true } unless message.frozen?
         STDERR.puts message
       end
       exit 1
