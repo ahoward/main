@@ -70,7 +70,7 @@ class GetoptLong
     #
     # Whether error messages are output to stderr.
     #
-    @quiet = FALSE
+    @quiet = false
 
     #
     # Status code.
