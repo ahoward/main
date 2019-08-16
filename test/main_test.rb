@@ -117,7 +117,6 @@ class T < Test::Unit::TestCase
 # parameter parsing 
 #
   def test_0080
-    p = nil
     assert_raises(Main::Parameter::NotGiven){
       main(){
         argument 'foo'
@@ -129,7 +128,6 @@ class T < Test::Unit::TestCase
     p = nil
     m = nil
     argv = %w[ 42 ]
-    given = nil
     assert_nothing_raised{
       main(argv.dup){
         argument 'foo'
@@ -144,7 +142,6 @@ class T < Test::Unit::TestCase
   def test_0100
     p = nil
     argv = %w[]
-    given = nil
     assert_nothing_raised{
       main(argv){
         p = argument('foo'){ optional }
@@ -160,7 +157,6 @@ class T < Test::Unit::TestCase
   def test_0101
     p = nil
     argv = %w[]
-    given = nil
     assert_nothing_raised{
       main(argv){
         p = argument('foo'){ required false }
@@ -492,12 +488,12 @@ class T < Test::Unit::TestCase
 #
   def test_0280
     assert_nothing_raised{
-      u = Main::Usage.new
+      Main::Usage.new
     }
   end
   def test_0290
     assert_nothing_raised{
-      u = Main::Usage.default(Main.factory)
+      Main::Usage.default(Main.factory)
     }
   end
   def test_0300
@@ -733,32 +729,29 @@ class T < Test::Unit::TestCase
     assert m.param['zero_or_more'].values == argv
   end 
   def test_0450
-    m = nil
     argv = %w()
     assert_raises(Main::Parameter::NotGiven){
       main(argv.dup) {
         argument('one_or_more'){ arity(-2) }
-        run{ m = self }
+        run{ self }
       }
     }
   end 
   def test_0460
-    m = nil
     argv = %w( a )
     assert_raises(Main::Parameter::Arity){
       main(argv.dup) {
         argument('two_or_more'){ arity(-3) }
-        run{ m = self }
+        run{ self }
       }
     }
   end 
   def test_0470
-    m = nil
     argv = %w( a )
     assert_raises(Main::Parameter::Arity){
       main(argv.dup) {
         argument('two_or_more'){ arity(-4) }
-        run{ m = self }
+        run{ self }
       }
     }
   end 
@@ -830,12 +823,11 @@ class T < Test::Unit::TestCase
 #
   def test_0500
     name = 'arity_zero_paramter_attr'
-    m = nil
     argv = %w( )
     assert_raises(Main::Parameter::Arity){
       main(argv.dup) {
         argument(name){ arity 0 }
-        run{ m = self }
+        run{ self }
       }
     }
   end 
@@ -897,7 +889,6 @@ class T < Test::Unit::TestCase
   end 
 
   def test_0550
-    name  = 'mode_argument_with_help_parameter_outputs_help'
     p = nil
     argv = %w( foo help )
     assert_nothing_raised{

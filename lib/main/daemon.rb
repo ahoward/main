@@ -225,7 +225,7 @@ module Main
         begin
           cmd_stop
           break
-        rescue Object => e
+        rescue Object
           if alive?
             sleep(rand)
           else

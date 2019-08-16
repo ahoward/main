@@ -107,7 +107,6 @@ module Main
     #
       def dynamically_extend_via_commandline_modes!
         self.breadth_first_modes = modes.dup
-        size = modes.size
 
         loop do
           modes.each do |mode|
@@ -185,7 +184,7 @@ module Main
       def usage(*args, &block)
         usage! unless defined? @usage 
         return @usage if args.empty? and block.nil?
-        key, value, *ignored = args
+        key, value, * = args
         value = block.call if block
         @usage[key.to_s] = value.to_s
       end
@@ -367,7 +366,7 @@ module Main
                 else
                   []
               end
-            dash = lines.shift if lines.first.to_s =~ /^---/
+            lines.shift if lines.first.to_s =~ /^---/
             require 'fileutils' unless defined?(FileUtils)
             FileUtils.mkdir_p(File.dirname(config_path))
             open(config_path, 'w') do |fd|

@@ -44,7 +44,7 @@ module Main
       def columnize buf, opts = {}
         width = Util.getopt 'width', opts, 80
         indent = Util.getopt 'indent', opts
-        indent = Fixnum === indent ? (' ' * indent) : "#{ indent }"
+        indent = Numeric === indent ? (' ' * indent.to_i) : "#{ indent }"
         column = []
         words = buf.split %r/\s+/o
         row = "#{ indent }"

@@ -20,7 +20,6 @@ module Main
       end
 
       def find_by_mode m, options = {}
-        quiet = options['quiet'] || options[:quiet]
         each_pair do |mode, klass|
           return mode if mode == m
         end

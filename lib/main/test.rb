@@ -11,10 +11,10 @@ module Main
 
       argv = options[:argv]
       env = options[:env]
-      logger = options[:logger]
-      stdin = options[:stdin]
-      stdout = options[:stdout]
-      stderr = options[:stderr]
+      #logger = options[:logger]
+      #stdin = options[:stdin]
+      #stdout = options[:stdout]
+      #stderr = options[:stderr]
 
       Main.push_ios!
 

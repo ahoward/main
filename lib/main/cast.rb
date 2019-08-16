@@ -7,10 +7,15 @@ module Main
 
     List = []
 
-    def self.cast m, &b
-      define_method m, &b
-      export m
-      List << m.to_s
+    def Cast.cast(*args, &block)
+      if args.first && block
+        method = args.shift
+        define_method(method, &block)
+        export(method)
+        List << (method.to_s)
+      else
+        Cast.send(*args)
+      end
     end
 
     cast :boolean do |obj|
@@ -152,12 +157,7 @@ module Main
         m
       raise ArgumentError, "ambiguous cast: #{ sym.inspect } (#{ List.join ',' })" unless
         candidates.empty? or m.to_s == sym.to_s
-      this = self
       lambda{|obj| method(m).call obj}
-    end
-
-    def Cast.cast(which, *args, &block)
-      Cast.send(which, *args, &block)
     end
   end
 end

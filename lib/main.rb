@@ -1,7 +1,7 @@
 module Main
 # top level constants
 #
-  Main::VERSION = '6.2.2' unless
+  Main::VERSION = '6.2.3' unless
     defined? Main::VERSION
   def Main.version() Main::VERSION end
 
@@ -11,7 +11,6 @@ module Main
 
   Main::LIBDIR = File.join(File.dirname(File.expand_path(__FILE__)), self.name.downcase, '') unless
     defined? Main::LIBDIR
-  def self.libdir() Main::LIBDIR end
 
   Main::EXIT_SUCCESS = 0 unless defined? Main::EXIT_SUCCESS
   Main::EXIT_FAILURE = 1 unless defined? Main::EXIT_FAILURE

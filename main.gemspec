@@ -3,7 +3,7 @@
 
 Gem::Specification::new do |spec|
   spec.name = "main"
-  spec.version = "6.2.2"
+  spec.version = "6.2.3"
   spec.platform = Gem::Platform::RUBY
   spec.summary = "main"
   spec.description = "a class factory and dsl for generating command line programs real quick"
@@ -14,7 +14,6 @@ Gem::Specification::new do |spec|
  "README.erb",
  "Rakefile",
  "TODO",
- "a.rb",
  "lib",
  "lib/main",
  "lib/main.rb",

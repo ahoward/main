@@ -240,8 +240,6 @@ module Main
           self
         end
 
-      this = self
-
       %w[ before instead after ].each do |which|
         getter = "error_handler_#{ which }"
         query = "error_handler_#{ which }?"
@@ -462,7 +460,7 @@ module Main
             i += 1
             b = argv[idx + 1]
             s = "#{ a }#{ b }"
-            m, key, *ignored = kre.match(s).to_a
+            m, key, * = kre.match(s).to_a
             if m
               replacements[i] ||= a.gsub %r/^\s*#{ key }/, opt
               next

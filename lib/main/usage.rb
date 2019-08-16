@@ -142,27 +142,26 @@ module Main
 
       parameters = arguments + keywords + options + environment
 
-      s =
-        parameters.map do |p|
-          ps = ''
-          ps << Util.columnize("#{ p.synopsis }", :indent => 2, :width => 78)
-          #ps << Util.columnize("* #{ p.synopsis }", :indent => 2, :width => 78)
+      parameters.map do |p|
+        ps = ''
+        ps << Util.columnize("#{ p.synopsis }", :indent => 2, :width => 78)
+        #ps << Util.columnize("* #{ p.synopsis }", :indent => 2, :width => 78)
+        #ps << "\n"
+        if p.description?
+          ps << "\n"
+          ps << Util.columnize("#{ p.description }", :indent => 6, :width => 78)
+          #ps << Util.columnize(p.description, :indent => 6, :width => 78)
           #ps << "\n"
-          if p.description?
+        end
+        #ps << "\n"
+        unless(p.examples.nil? or p.examples.empty?)
+          p.examples.each do |example|
             ps << "\n"
-            ps << Util.columnize("#{ p.description }", :indent => 6, :width => 78)
-            #ps << Util.columnize(p.description, :indent => 6, :width => 78)
-            #ps << "\n"
+            ps << Util.columnize("#{ example }", :indent => 8, :width => 78)
           end
-          #ps << "\n"
-          unless(p.examples.nil? or p.examples.empty?)
-            p.examples.each do |example|
-              ps << "\n"
-              ps << Util.columnize("#{ example }", :indent => 8, :width => 78)
-            end
-          end
-          ps
-        end.join("\n")
+        end
+        ps
+      end.join("\n")
     end
 
     def author_section
