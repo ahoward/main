@@ -36,8 +36,8 @@ DESCRIPTION
     require 'main'
 
     Main {
-      argument 'foo'
-      option 'bar'
+      argument 'bar'
+      option 'foo'
 
       def run
         p params['foo']
