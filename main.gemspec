@@ -3,7 +3,7 @@
 
 Gem::Specification::new do |spec|
   spec.name = "main"
-  spec.version = "6.2.3"
+  spec.version = "6.3.0"
   spec.platform = Gem::Platform::RUBY
   spec.summary = "main"
   spec.description = "a class factory and dsl for generating command line programs real quick"
@@ -55,18 +55,17 @@ Gem::Specification::new do |spec|
   spec.test_files = nil
 
   
-    spec.add_dependency(*["chronic", "~> 0.6", ">= 0.6.2"])
+    spec.add_dependency(*["chronic", "~> 0.10", ">= 0.10.2"])
   
-    spec.add_dependency(*["fattr", "~> 2.2", ">= 2.2.0"])
+    spec.add_dependency(*["fattr", "~> 2.4", ">= 2.4.0"])
   
-    spec.add_dependency(*["arrayfields", "~> 4.7", ">= 4.7.4"])
+    spec.add_dependency(*["arrayfields", "~> 4.9", ">= 4.9.2"])
   
-    spec.add_dependency(*["map", "~> 6.1", ">= 6.1.0"])
+    spec.add_dependency(*["map", "~> 6.6", ">= 6.6.0"])
   
 
   spec.extensions.push(*[])
 
-  spec.rubyforge_project = "codeforpeople"
   spec.author = "Ara T. Howard"
   spec.email = "ara.t.howard@gmail.com"
   spec.homepage = "https://github.com/ahoward/main"

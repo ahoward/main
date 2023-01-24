@@ -12,8 +12,8 @@ module Main
       fattr('stderr'){ main.stderr }
       fattr('logger'){ main.logger }
       fattr('script'){ main.script }
-      fattr('params')
-      fattr('finalizers')
+      fattr('params'){ Parameter::Table.new }
+      fattr('finalizers'){ [] }
 
       %w( 
         program name synopsis description author version
@@ -51,16 +51,11 @@ module Main
       def post_initialize() :hook end
 
       def setup_finalizers
-        @finalizers ||= []
-        finalizers = @finalizers
-        ObjectSpace.define_finalizer(self) do
-          while((f = finalizers.pop)); f.call; end
-        end
+        self.class.setup_finalizers(self)
       end
 
       def finalize
-        @finalizers ||= []
-        while((f = @finalizers.pop)); f.call; end
+        while((f = finalizers.pop)); f.call; end
       end
 
       def setup_io_redirection
@@ -92,10 +87,9 @@ module Main
       end
 
       def setup_io_restoration
-        @finalizers ||= []
         [STDIN, STDOUT, STDERR].each do |io|
           dup = io.dup
-          @finalizers.push(
+          finalizers.push(
             lambda do
               io.reopen(dup)
             end
@@ -111,7 +105,7 @@ module Main
               io
             else
               fd = open(io.to_s, 'r+')
-              @finalizers.push(lambda{ fd.close })
+              finalizers.push(lambda{ fd.close })
               fd
             end
           begin
@@ -132,7 +126,7 @@ module Main
               io
             else
               fd = open(io.to_s, 'w+')
-              @finalizers.push(lambda{ fd.close })
+              finalizers.push(lambda{ fd.close })
               fd
             end
           begin
@@ -153,7 +147,7 @@ module Main
               io
             else
               fd = open(io.to_s, 'w+')
-              @finalizers.push(lambda{ fd.close })
+              finalizers.push(lambda{ fd.close })
               fd
             end
           begin
@@ -173,8 +167,7 @@ module Main
         before_parse_parameters
 
         self.class.parameters.parse(self)
-        @params = Parameter::Table.new
-        self.class.parameters.each{|p| @params[p.name.to_s] = p}
+        self.class.parameters.each{|p| params[p.name.to_s] = p}
 
         after_parse_parameters
         post_parse_parameters

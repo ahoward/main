@@ -71,6 +71,7 @@ module Main
             define_method(:run, &block) if block
             wrap_run!
           end
+
           program
         end
 
@@ -78,6 +79,9 @@ module Main
 
       def new()
         instance = allocate
+
+        setup_finalizers(instance)
+
         instance.instance_eval do
           pre_initialize()
           before_initialize()
@@ -86,7 +90,16 @@ module Main
           after_initialize()
           post_initialize()
         end
+
         instance
+      end
+
+      def setup_finalizers(instance)
+        instance.finalizers = (finalizers = [])
+
+        ObjectSpace.define_finalizer(instance) do
+          while((f = finalizers.pop)); f.call; end
+        end
       end
 
       def params
