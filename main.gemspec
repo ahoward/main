@@ -63,6 +63,11 @@ Gem::Specification::new do |spec|
   
     spec.add_dependency(*["map", "~> 6.6", ">= 6.6.0"])
   
+    # Gems used by `main` that are no longer in the default gems in Ruby 3.5.0.
+    # TODO: What should the version requirements be?
+    spec.add_dependency(*["logger"])
+    spec.add_dependency(*["ostruct"])
+  
 
   spec.extensions.push(*[])
 
