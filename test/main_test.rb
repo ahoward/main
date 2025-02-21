@@ -992,6 +992,15 @@ class T < Test::Unit::TestCase
       end
     end
   end
+  def test_0930
+    argv = ['\1', '[' , ']', '\\']
+    assert_nothing_raised{
+      main(argv.dup){
+        argument('args') { arity -1 }
+        define_method('run'){ 42 }
+      }.run
+    }
+  end
 end
 
 

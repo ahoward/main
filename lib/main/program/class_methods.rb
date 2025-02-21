@@ -135,7 +135,7 @@ module Main
             end
           end
 
-          arg = argv.first && %r/^#{ argv.first }/
+          arg = argv.first && %r/^#{ Regexp.escape(argv.first) }/
           more_modes = (
             !modes.empty? and modes.any?{|mode| arg && mode.name =~ arg}
           )
