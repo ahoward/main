@@ -40,7 +40,6 @@ class T < Test::Unit::TestCase
     main
   end
 
- 
 # basic test
 #
   def test_0000
@@ -57,9 +56,8 @@ class T < Test::Unit::TestCase
         define_method(:run){ x = 42 }
       }
     }
-    assert_equal 42, x 
+    assert_equal 42, x
   end
- 
 # exit status
 #
   def test_0020
@@ -996,10 +994,26 @@ class T < Test::Unit::TestCase
     argv = ['\1', '[' , ']', '\\']
     assert_nothing_raised{
       main(argv.dup){
-        argument('args') { arity -1 }
+        argument('args') { arity(-1) }
         define_method('run'){ 42 }
       }.run
     }
+  end
+  def test_0940
+    %w[ exit_failure! exit_success! exit_warn! ].each do |exit_method|
+      assert_nothing_raised{
+        result = 42
+
+        main(){
+          define_method :run do
+            send(exit_method)
+            result = :boom
+          end
+        }.run
+
+        assert result == 42
+      }
+    end
   end
 end
 

@@ -15,12 +15,24 @@ module Main
       fattr('params'){ Parameter::Table.new }
       fattr('finalizers'){ [] }
 
-      %w( 
+      %w(
         program name synopsis description author version
-        exit_status exit_success exit_failure exit_warn exit_warning
+        exit_status
         logger_level
         usage
       ).each{|a| fattr(a){ self.class.send a}}
+
+      %w( success failure warn warning ).each do |status|
+        module_eval <<-____, __FILE__, __LINE__
+          def exit_#{ status }
+            self.class.send(:exit_#{ status })
+          end
+
+          def exit_#{ status }!
+            throw :exit, self.class.send(:exit_#{ status })
+          end
+        ____
+      end
 
       alias_method 'status', 'exit_status'
       alias_method 'status=', 'exit_status='
@@ -32,11 +44,11 @@ module Main
       end
 
       %w( debug info warn fatal error ).each do |m|
-        module_eval <<-code, __FILE__, __LINE__
+        module_eval <<-____, __FILE__, __LINE__
           def #{ m }(*a, &b)
             logger.#{ m }(*a, &b)
           end
-        code
+        ____
       end
 
       def pre_initialize() :hook end
@@ -254,11 +266,11 @@ module Main
       end
 
       %w[ before instead after ].each do |which|
-        module_eval <<-code, __FILE__, __LINE__
+        module_eval <<-____, __FILE__, __LINE__
           def error_handler_#{ which }(*argv, &block)
             block.call(*argv)
           end
-        code
+        ____
       end
 
       def instance_eval_block(*argv, &block)
