@@ -1017,9 +1017,19 @@ class T < Test::Unit::TestCase
   end
   def test_0950
     assert_nothing_raised{
+      error = nil
+
       main{
-        params[:nothing]
+        define_method(:run) do
+          begin
+            params[:missing]
+          rescue Main::Parameter::NoneSuch => e
+            error = e
+          end
+        end
       }.run
+
+      assert error.message =~ /missing/
     }
   end
 end
