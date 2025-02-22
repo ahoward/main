@@ -164,18 +164,6 @@ module Main
       self.required !bool
     end
 
-=begin
-    def setup!
-      return false unless given?
-      adding_handlers do
-        check_arity
-        apply_casting
-        check_validation
-      end
-      true
-    end
-=end
-
     def setup!
       adding_handlers do
         check_arity
