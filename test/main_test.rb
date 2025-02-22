@@ -1015,6 +1015,13 @@ class T < Test::Unit::TestCase
       }
     end
   end
+  def test_0950
+    assert_nothing_raised{
+      main{
+        params[:nothing]
+      }.run
+    }
+  end
 end
 
 
