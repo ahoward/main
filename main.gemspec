@@ -3,17 +3,19 @@
 
 Gem::Specification::new do |spec|
   spec.name = "main"
-  spec.version = "6.3.0"
+  spec.version = "6.4.0"
   spec.platform = Gem::Platform::RUBY
   spec.summary = "main"
   spec.description = "a class factory and dsl for generating command line programs real quick"
   spec.license = "Ruby"
 
   spec.files =
-["README",
+["LICENSE",
+ "README",
  "README.erb",
  "Rakefile",
  "TODO",
+ "a.rb",
  "lib",
  "lib/main",
  "lib/main.rb",
@@ -53,6 +55,7 @@ Gem::Specification::new do |spec|
   spec.require_path = "lib"
 
   spec.test_files = nil
+  spec.required_ruby_version = '>= 2.0'
 
   
     spec.add_dependency(*["chronic", "~> 0.10", ">= 0.10.2"])

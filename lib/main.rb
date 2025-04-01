@@ -1,7 +1,7 @@
 module Main
 # top level constants
 #
-  Main::VERSION = '6.3.0' unless
+  Main::VERSION = '6.4.0' unless
     defined? Main::VERSION
   def Main.version() Main::VERSION end
 

@@ -98,7 +98,7 @@ task :gemspec do
     This.extensions = []
     extensions = This.extensions
     %w( Makefile configure extconf.rb ).each do |ext|
-      extensions << ext if File.exists?(ext)
+      extensions << ext if File.exist?(ext)
     end
   end
   extensions = [extensions].flatten.compact
@@ -137,6 +137,7 @@ task :gemspec do
             spec.require_path = "lib"
 
             spec.test_files = <%= test_files.inspect %>
+            spec.required_ruby_version = '>= 2.0'
 
             <% dependencies.each do |lib_version| %>
               spec.add_dependency(*<%= Array(lib_version).flatten.inspect %>)
