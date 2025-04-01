@@ -1053,6 +1053,29 @@ class T < Test::Unit::TestCase
     assert error
     assert error.message =~ /foo/
   end
+  def test_0970
+    argv = []
+    error = nil
+
+    assert_nothing_raised{
+      begin
+        main(argv){
+          option('foo', 'f'){
+            required
+          }
+
+          define_method(:run) do
+            params[:foo]
+          end
+        }.run
+      rescue => e
+        error = e
+      end
+    }
+
+    assert error
+    assert error.message =~ /foo/
+  end
 end
 
 
