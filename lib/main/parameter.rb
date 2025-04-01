@@ -69,7 +69,7 @@ module Main
     fattr('defaults'){ [] }
     fattr('examples'){ [] }
 
-    fattr 'arity' => 1
+    fattr('arity'){ 1 }
     fattr 'required' => false
 
     fattr 'error_handler_before'
@@ -149,7 +149,7 @@ module Main
     end
 
     def argument_required?
-      argument and 
+      argument and
         argument.to_s.downcase.to_sym == :required
     end
     def argument_optional?
@@ -160,7 +160,7 @@ module Main
     def optional?
       not required?
     end
-    def optional= bool 
+    def optional= bool
       self.required !bool
     end
 
@@ -172,12 +172,17 @@ module Main
       end
     end
 
-    def check_arity 
+    def check_arity
       return true if not given? and optional?
 
+      arity = self.arity
       ex = values.size == 0 ? NotGiven : Arity
 
       (raise ex, "#{ typename })" if values.size.zero? and argument_required?) unless arity == -1
+
+      if arity >= 0 && values.size > arity
+        raise ex, "#{ typename } #{ values.size }/#{ arity }"
+      end
 
       if arity >= 0
         min = arity
@@ -191,14 +196,14 @@ module Main
 
       if values.size < arity
         if argument_optional?
-          raise ex, "#{ typename }) #{ values.size }/#{ sign }#{ arity }" if(values.size < arity and values.size > 0)
+          raise ex, "#{ typename } #{ values.size }/#{ sign }#{ arity }" if(values.size < arity and values.size > 0)
         elsif argument_required? or argument_none?
-          raise ex, "#{ typename }) #{ values.size }/#{ sign }#{ arity }" if(values.size < arity)
+          raise ex, "#{ typename } #{ values.size }/#{ sign }#{ arity }" if(values.size < arity)
         end
       end
     end
 
-    def apply_casting 
+    def apply_casting
       if cast?
         op = cast.respond_to?('call') ? cast : Cast[cast]
         case op.arity
@@ -213,17 +218,17 @@ module Main
       end
     end
 
-    def check_validation 
+    def check_validation
       if validate?
         values.each do |value|
-          validate[value] or 
+          validate[value] or
             raise InValid, "invalid: #{ typename }=#{ value.inspect }"
         end
       end
     end
 
     def add_handlers e
-      esc = 
+      esc =
         class << e
           self
         end
@@ -232,7 +237,7 @@ module Main
         getter = "error_handler_#{ which }"
         query = "error_handler_#{ which }?"
         if send(query)
-          handler = send getter 
+          handler = send getter
           esc.module_eval do
             define_method(getter) do |main|
               main.instance_eval_block self, &handler
@@ -264,7 +269,7 @@ module Main
       fattr 'synopsis' do
         label = name
         op = required ? "->" : "~>"
-        value = defaults.size > 0 ? "#{ name }=#{ defaults.join ',' }" : name 
+        value = defaults.size > 0 ? "#{ name }=#{ defaults.join ',' }" : name
         value = "#{ cast }(#{ value })" if(cast and not cast.respond_to?(:call))
         "#{ label } (#{ arity } #{ op } #{ value })"
       end
@@ -272,16 +277,16 @@ module Main
 
     class Option < Parameter
       fattr 'required' => false
-      fattr 'arity' => 0
+      fattr('arity'){ 1 }
 
       fattr 'synopsis' do
         long, *short = names
-        value = cast || name 
-        rhs = argument ? (argument == :required ? "=#{ name }" : "=[#{ name }]") : nil 
+        value = cast || name
+        rhs = argument ? (argument == :required ? "=#{ name }" : "=[#{ name }]") : nil
         label = ["--#{ long }#{ rhs }", short.map{|s| "-#{ s }"}].flatten.join(", ")
         unless argument_none?
           op = required ? "->" : "~>"
-          value = defaults.size > 0 ? "#{ name }=#{ defaults.join ',' }" : name 
+          value = defaults.size > 0 ? "#{ name }=#{ defaults.join ',' }" : name
           value = "#{ cast }(#{ value })" if(cast and not cast.respond_to?(:call))
           "#{ label } (#{ arity } #{ op } #{ value })"
         else
@@ -292,24 +297,24 @@ module Main
 
     class Keyword < Parameter
       fattr 'required' => false
-      fattr 'argument' => :required 
+      fattr 'argument' => :required
 
       fattr 'synopsis' do
         label = "#{ name }=#{ name }"
         op = required ? "->" : "~>"
-        value = defaults.size > 0 ? "#{ name }=#{ defaults.join ',' }" : name 
+        value = defaults.size > 0 ? "#{ name }=#{ defaults.join ',' }" : name
         value = "#{ cast }(#{ value })" if(cast and not cast.respond_to?(:call))
         "#{ label } (#{ arity } #{ op } #{ value })"
       end
     end
 
     class Environment < Parameter
-      fattr 'argument' => :required 
+      fattr 'argument' => :required
 
       fattr 'synopsis' do
         label = "env[#{ name }]=#{ name }"
         op = required ? "->" : "~>"
-        value = defaults.size > 0 ? "#{ name }=#{ defaults.join ',' }" : name 
+        value = defaults.size > 0 ? "#{ name }=#{ defaults.join ',' }" : name
         value = "#{ cast }(#{ value })" if(cast and not cast.respond_to?(:call))
         "#{ label } (#{ arity } #{ op } #{ value })"
       end
@@ -343,7 +348,7 @@ module Main
         defaults!
         validate!
 
-        argv.push(*ignore) unless ignore.empty? 
+        argv.push(*ignore) unless ignore.empty?
 
         return self
       ensure
@@ -351,7 +356,7 @@ module Main
       end
 
       def parse_options argv, params = nil
-        params ||= options 
+        params ||= options
 
         spec, h, s = [], {}, {}
 
@@ -365,9 +370,9 @@ module Main
             else GetoptLong::NO_ARGUMENT
             end
           a = [ long, shorts, type ].flatten
-          spec << a 
-          h[long] = p 
-          s[long] = a 
+          spec << a
+          h[long] = p
+          s[long] = a
         end
 
         begin
@@ -392,12 +397,6 @@ module Main
           ex.extend Softspoken
           raise ex
         end
-
-=begin
-        params.each do |p|
-          p.setup!
-        end
-=end
       end
 
       def parse_arguments argv, params=nil
@@ -423,12 +422,6 @@ module Main
             end
           end
         end
-
-=begin
-        params.each do |p|
-          p.setup!
-        end
-=end
       end
 
       def parse_keywords argv, params=nil
@@ -442,7 +435,7 @@ module Main
 
           kre = %r/^\s*(#{ names.join '|' })\s*=/
           opt = "--#{ name }"
-          i = -1 
+          i = -1
 
           argv.each_with_index do |a, idx|
             i += 1
@@ -453,12 +446,6 @@ module Main
               replacements[i] ||= a.gsub %r/^\s*#{ key }/, opt
               next
             end
-=begin
-            abbrev = name.index(key) == 0
-            if abbrev
-              replacements[i] ||= a.gsub %r/^\s*#{ key }/, opt
-            end
-=end
           end
         end
 
@@ -468,7 +455,7 @@ module Main
 
         parse_options argv, params
       end
-      
+
       def parse_environment env, params=nil
         params ||= select{|p| p.type == :environment}
 
@@ -479,17 +466,11 @@ module Main
           next unless value
           p.add_value value
         end
-
-=begin
-        params.each do |p|
-          p.setup!
-        end
-=end
       end
 
       def defaults!
         each do |p|
-          if(p.defaults? and (not p.given?)) 
+          if(p.defaults? and (not p.given?))
             p.defaults.each do |default|
               p.values << (default.respond_to?('to_proc') ? main.instance_eval(&default) : default) # so as NOT to set 'given?'
             end
@@ -499,22 +480,18 @@ module Main
 
       def validate!
         each do |p|
-          #p.adding_handlers do
-            #next if p.arity == -1
-            #raise NotGiven, "#{ p.typename } not given" if(p.required? and (not p.given?))
-          #end
           p.setup!
         end
       end
 
-      [:parameter, :option, :argument, :keyword, :environment].each do |m| 
+      [:parameter, :option, :argument, :keyword, :environment].each do |m|
         define_method("#{ m }s"){ select{|p| p.type == m or m == :parameter} }
 
         define_method("has_#{ m }?") do |name, *names|
           catch :has do
             names = Cast.list_of_string name, *names
             send("#{ m }s").each do |param|
-              common = Cast.list_of_string(param.names) & names 
+              common = Cast.list_of_string(param.names) & names
               throw :has, true unless common.empty?
             end
             false
@@ -527,7 +504,7 @@ module Main
         names = Cast.list_of_string name, *names
         keep = []
         each do |param|
-          common = Cast.list_of_string(param.names) & names 
+          common = Cast.list_of_string(param.names) & names
           keep << param if common.empty?
         end
         replace keep
@@ -591,18 +568,18 @@ module Main
         param.type?
       end
 
-      def synopsis *arg 
+      def synopsis *arg
         arg.size == 0 ? param.synopsis : (param.synopsis arg.first)
       end
 
-      def argument arg 
-        param.argument arg 
+      def argument arg
+        param.argument arg
       end
       def argument_required bool = true
         if bool
           param.argument :required
         else
-          param.argument false 
+          param.argument false
         end
       end
       def argument_required?
@@ -613,46 +590,46 @@ module Main
         if bool
           param.argument :optional
         else
-          param.argument false 
+          param.argument false
         end
       end
       def argument_optional?
         param.argument_optional?
       end
 
-      def required bool = true 
-        param.required = bool 
+      def required bool = true
+        param.required = bool
       end
       def required?
         param.required?
       end
 
-      def optional bool = true 
-        if bool 
-          param.required !bool  
+      def optional bool = true
+        if bool
+          param.required !bool 
         else
-          param.required bool  
+          param.required bool 
         end
       end
       def optional?
         param.optional?
       end
 
-      def cast sym=nil, &b 
-        param.cast = sym || b 
+      def cast sym=nil, &b
+        param.cast = sym || b
       end
       def cast?
         param.cast?
       end
 
-      def validate sym=nil, &b 
-        param.validate = sym || b 
+      def validate sym=nil, &b
+        param.validate = sym || b
       end
       def validate?
         param.validate?
       end
 
-      def description s 
+      def description s
         param.description = s.to_s
       end
       def description?
@@ -713,7 +690,7 @@ module Main
         def [] *a, &b
           p = super
         ensure
-          raise NoneSuch, a.join(',') unless p 
+          raise NoneSuch, a.join(',') unless p
         end
       end
     end

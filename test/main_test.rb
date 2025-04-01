@@ -1032,6 +1032,27 @@ class T < Test::Unit::TestCase
       assert error.message =~ /missing/
     }
   end
+  def test_0960
+    argv = ['--foo', '--foo']
+    error = nil
+
+    assert_nothing_raised{
+      begin
+        main(argv){
+          option(:foo)
+
+          define_method(:run) do
+            params[:foo]
+          end
+        }.run
+      rescue => e
+        error = e
+      end
+    }
+
+    assert error
+    assert error.message =~ /foo/
+  end
 end
 
 
